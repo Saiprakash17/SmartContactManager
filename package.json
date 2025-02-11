@@ -1,0 +1,25 @@
+{
+  "name": "contactmanager",
+  "version": "1.0.0",
+  "description": "SmartContactManager will be a comprehensive project designed to manage contacts efficiently. This project will leverage a variety of modern technologies and frameworks to provide a robust and scalable solution. Below is a detailed description of the technologies and features that will be used in this project.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saiprakash17/SmartContactManager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Saiprakash17/SmartContactManager/issues"
+  },
+  "homepage": "https://github.com/Saiprakash17/SmartContactManager#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.6",
+    "tailwindcss": "^4.0.6"
+  }
+}

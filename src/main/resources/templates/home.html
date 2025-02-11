@@ -4,19 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Manager</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
 <body>
-    <header>
-        <h1 th:text="${title}">Contact Manager</h1>
-    </header>
-    <main>
-        <h2>Welcome to Contact Manager</h2>
-        <p th:text="${message}"></p>
-        <a th:href="${gitHub}">Click here for git repo</a>
-        <p>Manage your contacts efficiently and easily.</p>
-    </main>
-    <footer>
-        <p>&copy; 2023 Contact Manager. All rights reserved.</p>
-    </footer>
+    <div class="container text-2xl">
+        <header>
+            <h1 th:text="${title}">Contact Manager</h1>
+        </header>
+        <main>
+            <h2>Welcome to Contact Manager...</h2>
+            <p th:text="${message}"></p>
+            <a th:href="${gitHub}">Click here for git repo</a>
+            <p>Manage your contacts efficiently and easily.</p>
+        </main>
+        <footer>
+            <p>&copy; 2023 Contact Manager. All rights reserved.</p>
+        </footer>
+    </div>
 </body>
 </html>
