@@ -1,7 +1,7 @@
 # SmartContactManager
 SmartContactManager will be a comprehensive project designed to manage contacts efficiently. This project will leverage a variety of modern technologies and frameworks to provide a robust and scalable solution. Below is a detailed description of the technologies and features that will be used in this project.
 
-## Technologies Used
+## Technologies
 
 ### Spring Boot
 Spring Boot will simplify the development of production-ready applications by providing a set of conventions and default configurations, allowing for easy setup and rapid development.
