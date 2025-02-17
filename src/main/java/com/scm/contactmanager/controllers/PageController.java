@@ -18,4 +18,54 @@ public class PageController {
         
         return "home";
     }
+
+    @RequestMapping("/about")
+    public String about(Model model) {
+        System.out.println("About page requested");
+
+        // Setting the attributes for the about page
+        model.addAttribute("title", "About - Contact Manager");
+        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        return "about";
+    }
+
+    @RequestMapping("/services")
+    public String services(Model model) {
+        System.out.println("services page requested");
+
+        // Setting the attributes for the about page
+        model.addAttribute("title", "About - Contact Manager");
+        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        return "services";
+    }
+
+    @RequestMapping("/contact")
+    public String contact(Model model) {
+        System.out.println("contact page requested");
+
+        // Setting the attributes for the about page
+        model.addAttribute("title", "About - Contact Manager");
+        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        return "contact";
+    }
+
+    @RequestMapping("/login")
+    public String login(Model model) {
+        System.out.println("login page requested");
+
+        // Setting the attributes for the about page
+        model.addAttribute("title", "About - Contact Manager");
+        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        return "login";
+    }
+
+    @RequestMapping("/register")
+    public String register(Model model) {
+        System.out.println("register page requested");
+
+        // Setting the attributes for the about page
+        model.addAttribute("title", "About - Contact Manager");
+        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        return "register";
+    }
 }
