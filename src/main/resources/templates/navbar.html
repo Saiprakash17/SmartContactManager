@@ -15,7 +15,12 @@
 </a>
 
 <!-- Navbar CTA -->
-<div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+<div class="flex gap-2 md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+
+    <!-- Dark/Light theme button -->
+    <button id="themeButton" class=" bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
+        <i class="fa-solid fa-circle-half-stroke"></i> <span>Light</span>
+    </button>
 
     <a type="button"  th:href="@{/login}" class="text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-600 dark:focus:ring-blue-700">
         Login
