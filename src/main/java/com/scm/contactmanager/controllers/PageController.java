@@ -1,11 +1,27 @@
 package com.scm.contactmanager.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.scm.contactmanager.entities.User;
+import com.scm.contactmanager.forms.UserForm;
+import com.scm.contactmanager.helper.Message;
+import com.scm.contactmanager.helper.MessageType;
+import com.scm.contactmanager.services.UserService;
+
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @Controller
 public class PageController {
+
+    @Autowired
+    private UserService userService;
 
     @RequestMapping("/home")
     public String home(Model model) {
@@ -64,8 +80,50 @@ public class PageController {
         System.out.println("register page requested");
 
         // Setting the attributes for the about page
-        model.addAttribute("title", "About - Contact Manager");
-        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        UserForm userForm = new UserForm();
+        //userForm.setName("Sai Prakash");
+        model.addAttribute("userForm", userForm);
         return "register";
+    }
+
+    @RequestMapping(value = "/do-register", method = RequestMethod.POST)
+    public String registerUser(@Valid @ModelAttribute UserForm userForm, BindingResult rBindingResult, HttpSession session) {
+
+        System.out.println("Start Register User");
+        System.out.println(userForm);
+
+        // Check for errors
+        if (rBindingResult.hasErrors()) {
+            System.out.println("Error: " + rBindingResult);
+            return "register";
+        }
+
+        if(userForm.getPassword().equals(userForm.getConfirmPassword())) {
+            System.out.println("Password and Confirm Password are same");
+        } else {
+            System.out.println("Password and Confirm Password are not same");
+            Message message = Message.builder().content("Password and Confirm Password are not same").type(MessageType.red).build();
+            session.setAttribute("message", message);
+            return "redirect:/register";
+        }
+
+        // Create a new user
+        User user = new User();
+        user.setName(userForm.getName());   
+        user.setEmail(userForm.getEmail());
+        user.setPassword(userForm.getPassword());
+        user.setImageUrl(null);
+        user.setAbout(userForm.getAbout());
+        user.setPhoneNumber(userForm.getPhoneNumber());
+
+        //resisteration message
+        Message message = Message.builder().content("Registration Successful").type(MessageType.green).build();
+        session.setAttribute("message", message);
+
+        User savedUser = userService.saveUser(user);
+        System.out.println("Saved User: " + savedUser);
+
+        System.out.println("End Register User");
+        return "redirect:/register";
     }
 }

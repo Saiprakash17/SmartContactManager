@@ -6,9 +6,11 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,12 +45,13 @@ public class User {
     private String about;
 
     @Column(name = "phone_number", length = 100)
-    private boolean phoneNumber;
+    private String phoneNumber;
 
     private boolean enabled = false;
     private boolean emailVerified = false;
     private boolean phoneVerified = false;
 
+    @Enumerated(jakarta.persistence.EnumType.STRING)   
     // SELF, GOOGLE, FACEBOOK, GITHUB
     private Providers provider = Providers.SELF;
     private String providerUserId;
