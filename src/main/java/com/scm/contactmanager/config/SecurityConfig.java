@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -43,8 +44,25 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
         );
 
-        httpSecurity.formLogin(Customizer.withDefaults());
-        
+        httpSecurity.formLogin(formLogin ->
+                formLogin
+                        .loginPage("/login")
+                        .loginProcessingUrl("/authenticate")
+                        .defaultSuccessUrl("/user/dashboard", true)
+                        // .failureUrl("/login?error=true")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        //.permitAll()
+        );
+
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
+        httpSecurity.logout(logout ->
+                logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+        );
+
         return httpSecurity.build();
     }
     @Bean
