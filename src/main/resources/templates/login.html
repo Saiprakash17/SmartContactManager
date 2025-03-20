@@ -6,69 +6,25 @@
 <body>
     <div id="content">
         
-        <div class="flex justify-center items-center min-h-screen">
+        <div class="flex justify-center items-center">
             <div class="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
                 
             <form method="post" th:action = "@{'/authenticate'}" class="space-y-6" >
-
-                <!-- Message box -->
-                <!-- <div th:replace="message :: message"></div> -->
                 
                 <h5 class="text-xl font-medium text-gray-900 dark:text-white">Login to our platform</h5>
 
                 <div class = "text-red-600" th:if="${param.error}">Invalid username and password.</div>
                 <div class = "text-red-600" th:if="${param.logout}">You have been logged out.</div>
                 
-                <!-- <div>
-                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your name</label>
-                    <input type="text" name="name" id="name" th:field="*{name}"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="John Doe" required />
-                    <p th:if="${#fields.hasErrors('name')}"
-                    th:errors = "*{name}"
-                    class = "text-red-600 px-1 py-1"></p>
-                </div> -->
-                
                 <div>
                     <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
                     <input type="email" name="email" id="email"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="name@company.com" required />
-                    <!-- <p th:if="${#fields.hasErrors('email')}"
-                    th:errors = "*{email}"
-                    class = "text-red-600 px-1 py-1"></p> -->
                 </div>
                 
                 <div>
                     <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
                     <input type="password" name="password" id="password"  placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
-                    <!-- <p th:if="${#fields.hasErrors('password')}"
-                    th:errors = "*{password}"
-                    class = "text-red-600 px-1 py-1"></p> -->
                 </div>
-
-
-                <!-- <div>
-                    <label for="confirm-password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
-                    <input type="password" name="confirm-password" id="confirm-password" th:field="*{confirmPassword}" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
-                    <p th:if="${#fields.hasErrors('confirmPassword')}"
-                    th:errors = "*{confirmPassword}"
-                    class = "text-red-600 px-1 py-1"></p>
-                    <p class = "text-red-600 px-1" id="password-message"></p>
-                </div>
-                
-                <div>
-                    <label for="phone" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone number</label>
-                    <input type="tel" name="phone" id="phone" th:field="*{phoneNumber}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="123-456-7890" required />
-                    <p th:if="${#fields.hasErrors('phoneNumber')}"
-                    th:errors = "*{phoneNumber}"
-                    class = "text-red-600 px-1 py-1"></p>
-                    <p class="text-red-600 px-1" id="phone-message"></p>
-                </div>
-                
-                <div>
-                    <label for="about" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">About you</label>
-                    <textarea name="about" id="about" th:field="*{about}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Tell us about yourself" required></textarea>
-                    <p th:if="${#fields.hasErrors('about')}"
-                    th:errors = "*{about}"  
-                    class = "text-red-600 px-1 py-1"></p>
-                </div> -->
                 
                 <div class="flex justify-between">
                     <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
@@ -79,71 +35,30 @@
                     Don't have an account yet! <a th:href="@{/register}" class="text-blue-700 hover:underline dark:text-blue-500">Sign up</a>
                 </div>
 
-                <script>
-
-                    // const passwordField = document.getElementById('password');
-                    // const confirmPasswordField = document.getElementById('confirm-password');
-                    // const messageElement = document.getElementById('password-message');
-                    // const submitButton = document.querySelector('button[type="submit"]');
-            
-                    // submitButton.disabled = false;
-            
-                    // passwordField.addEventListener('input', validatePassword);
-                    // confirmPasswordField.addEventListener('input', validatePassword);
-                    // let validPassword = false;
-            
-                    // function validatePassword() {
-                    //     if (passwordField.value !== confirmPasswordField.value) {
-                    //         messageElement.textContent = 'Passwords do not match.';
-                    //         // messageElement.style.color = 'red';
-                    //         validPassword = false;
-                    //     } else {
-                    //         messageElement.textContent = 'Passwords match!';
-                    //         messageElement.style.color = 'green';
-                    //         validPassword = true;
-                    //     }
-                    //     toggleSubmitButton();
-                    // }       
-                    
-                    // const phoneField = document.getElementById('phone');
-                    // const phoneMessage = document.getElementById('phone-message');
-                    // let validPhoneNumber = false;
-                    // phoneField.addEventListener('input', validatePhoneNumber);
-            
-                    // function validatePhoneNumber() {
-                    //     const phoneRegex = /^\d{10}$/;
-                    //     if (!phoneRegex.test(phoneField.value)) {
-                    //         phoneMessage.textContent = 'Phone number must be 10 digits.';
-                    //         // phoneMessage.style.color = 'red';
-                    //         validPhoneNumber = false;
-                    //     } else {
-                    //         phoneMessage.textContent = '';
-                    //         validPhoneNumber = true;
-                    //     }
-                    //     toggleSubmitButton();
-                    // }
-            
-                    // function toggleSubmitButton() {
-                    //     submitButton.disabled = !(validPassword && validPhoneNumber);
-                    // }
-                    // const passwordField = document.getElementById('password');
-                    // const confirmPasswordField = document.getElementById('confirm-password');
-                    // const messageElement = document.getElementById('password-message');
-
-                    // passwordField.addEventListener('input', validatePassword);
-                    // confirmPasswordField.addEventListener('input', validatePassword);
-
-                    // function validatePassword() {
-                    //     if (passwordField.value !== confirmPasswordField.value) {
-                    //         messageElement.textContent = 'Passwords do not match.';
-                    //         messageElement.style.color = 'red';
-                    //     } else {
-                    //         messageElement.textContent = 'Passwords match!';
-                    //         messageElement.style.color = 'green';
-                    //     }
-                    // }
-                </script>
             </form>
+
+            <div class="social-buttons-container flex justify-between items-center flex-col space-y-4 mt-10">
+                <a class="login-with-google-btn w-1/2 px-3 py-2 w-1/2 font-semibold rounded-lg" th:href = "@{'/oauth2/authorization/google'}">Login with Google</a>
+                <a
+                data-th-href="@{'/oauth2/authorization/github'}"
+                type="button"
+                class="py-2 px-2 w-1/2 flex justify-center items-center bg-gray-600 hover:bg-gray-700 focus:ring-gray-500 focus:ring-offset-gray-200 text-white transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg"
+                >
+                    <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    class="mr-2"
+                    viewBox="0 0 1792 1792"
+                    >
+                    <path
+                        d="M896 128q209 0 385.5 103t279.5 279.5 103 385.5q0 251-146.5 451.5t-378.5 277.5q-27 5-40-7t-13-30q0-3 .5-76.5t.5-134.5q0-97-52-142 57-6 102.5-18t94-39 81-66.5 53-105 20.5-150.5q0-119-79-206 37-91-8-204-28-9-81 11t-92 44l-38 24q-93-26-192-26t-192 26q-16-11-42.5-27t-83.5-38.5-85-13.5q-45 113-8 204-79 87-79 206 0 85 20.5 150t52.5 105 80.5 67 94 39 102.5 18q-39 36-49 103-21 10-45 15t-57 5-65.5-21.5-55.5-62.5q-19-32-48.5-52t-49.5-24l-20-3q-21 0-29 4.5t-5 11.5 9 14 13 12l7 5q22 10 43.5 38t31.5 51l10 23q13 38 44 61.5t67 30 69.5 7 55.5-3.5l23-4q0 38 .5 88.5t.5 54.5q0 18-13 30t-40 7q-232-77-378.5-277.5t-146.5-451.5q0-209 103-385.5t279.5-279.5 385.5-103zm-477 1103q3-7-7-12-10-3-13 2-3 7 7 12 9 6 13-2zm31 34q7-5-2-16-10-9-16-3-7 5 2 16 10 10 16 3zm30 45q9-7 0-19-8-13-17-6-9 5 0 18t17 7zm42 42q8-8-4-19-12-12-20-3-9 8 4 19 12 12 20 3zm57 25q3-11-13-16-15-4-19 7t13 15q15 6 19-6zm63 5q0-13-17-11-16 0-16 11 0 13 17 11 16 0 16-11zm58-10q-2-11-18-9-16 3-14 15t18 8 14-14z"
+                    ></path>
+                    </svg>
+                    Sign in with GitHub
+                </a>
+            </div>
             </div>
         </div>
 
