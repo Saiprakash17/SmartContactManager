@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -33,32 +35,81 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         logger.info("OAuthAuthenticationSuccessHandler");
 
+        var oAuth2AuthenticationToken = (OAuth2AuthenticationToken) authentication;
+
+        String authrizedClientRegistrationId = oAuth2AuthenticationToken.getAuthorizedClientRegistrationId();
+
+        logger.info("Authorized Client Registration Id: " + authrizedClientRegistrationId);
+
         DefaultOAuth2User oAuthUser = (DefaultOAuth2User)authentication.getPrincipal();
 
-        logger.info("User Name: " + oAuthUser.getName());
-        logger.info("User Authorities: " + oAuthUser.getAuthorities());
         oAuthUser.getAttributes().forEach((k, v) -> {
-            logger.info(k + ": " + v);
-        });
+                logger.info(k + ": " + v);
+            });
 
-        String email = oAuthUser.getAttribute("email");
+
         User user = new User();
-        user.setEmail(email);
-        user.setName(oAuthUser.getAttribute("name"));
-        user.setImageUrl(oAuthUser.getAttribute("picture"));
-        user.setProvider(Providers.GOOGLE);
-        user.setProviderUserId(oAuthUser.getAttribute("sub"));
-        user.setEnabled(true);
-        user.setEmailVerified(true);
-        user.setAbout("Acoount created using Google OAuth2");
-        user.setRoles(List.of(AppConstants.ROLE_USER));
         user.setId(UUID.randomUUID().toString());
+        user.setRoles(List.of(AppConstants.ROLE_USER));
+        user.setEnabled(true);
         user.setPassword("");
-        user.setPhoneNumber("");
 
-        if(!userRepo.findByEmail(email).isPresent()){
+
+        if(authrizedClientRegistrationId.equals("google")){
+            user.setEmailVerified(true);
+            user.setEmail(oAuthUser.getAttribute("email").toString());
+            user.setImageUrl(oAuthUser.getAttribute("picture").toString());
+            user.setName(oAuthUser.getAttribute("name").toString());
+            user.setProviderUserId(oAuthUser.getName());
+            user.setProvider(Providers.GOOGLE);
+            user.setAbout("This account is created using google.");
+
+        }
+
+
+        else if (authrizedClientRegistrationId.equals("github")){
+            user.setEmailVerified(true);
+            String email = oAuthUser.getAttribute("email") != null ? oAuthUser.getAttribute("email").toString()
+                    : oAuthUser.getAttribute("login").toString() + "@gmail.com";
+
+            user.setEmail(email);
+            user.setImageUrl(oAuthUser.getAttribute("avatar_url").toString());
+            user.setName(oAuthUser.getAttribute("login").toString());
+            user.setProviderUserId(oAuthUser.getName());
+            user.setProvider(Providers.GITHUB);
+            user.setAbout("This account is created using github.");
+        }
+
+        else{
+            logger.error("Unknown OAuth2 provider: " + authrizedClientRegistrationId);
+        }
+
+        // DefaultOAuth2User oAuthUser = (DefaultOAuth2User)authentication.getPrincipal();
+
+        // logger.info("User Name: " + oAuthUser.getName());
+        // logger.info("User Authorities: " + oAuthUser.getAuthorities());
+        // oAuthUser.getAttributes().forEach((k, v) -> {
+        //     logger.info(k + ": " + v);
+        // });
+
+        // String email = oAuthUser.getAttribute("email");
+        // User user = new User();
+        // user.setEmail(email);
+        // user.setName(oAuthUser.getAttribute("name"));
+        // user.setImageUrl(oAuthUser.getAttribute("picture"));
+        // user.setProvider(Providers.GOOGLE);
+        // user.setProviderUserId(oAuthUser.getAttribute("sub"));
+        // user.setEnabled(true);
+        // user.setEmailVerified(true);
+        // user.setAbout("Acoount created using Google OAuth2");
+        // user.setRoles(List.of(AppConstants.ROLE_USER));
+        // user.setId(UUID.randomUUID().toString());
+        // user.setPassword("");
+        // user.setPhoneNumber("");
+
+        if(!userRepo.findByEmail(user.getEmail()).isPresent()){
             userRepo.save(user);
-            logger.info("User saved: " + email);
+            logger.info("User saved: " + user.getEmail());
         }
 
 
