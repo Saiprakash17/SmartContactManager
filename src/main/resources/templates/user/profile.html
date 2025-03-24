@@ -7,5 +7,10 @@
 </head>
 <body>
     <h1>This is User Profile Page</h1>
+
+    <div th:if="${loggedInUser}">
+        <h1 th:text="${loggedInUser.getName()}"></h1>
+        <h1 th:text="${loggedInUser.getEmail()}"></h1>
+    </div>
 </body>
 </html>
