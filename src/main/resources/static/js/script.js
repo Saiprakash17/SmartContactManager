@@ -9,12 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleTheme() {
     //let theme = getTheme();
     //initialize the theme
-    applyTheme();
+    applyTheme(currentTheme, null);
     //set the listener to theme button
     const themeButton = document.querySelector("#themeButton");   
     themeButton.addEventListener("click", (event) => {
         console.log("Theme button clicked");
         console.log("Current theme: " + currentTheme);
+        let oldTheme = currentTheme;
         if (currentTheme === "light") {
             currentTheme = "dark";
         } else {
@@ -22,7 +23,7 @@ function toggleTheme() {
         }
         setTheme(currentTheme);
         console.log("New theme: " + getTheme());
-        applyTheme();
+        applyTheme(currentTheme, oldTheme);
     });
 
     
@@ -41,13 +42,13 @@ function getTheme() {
 }
 
 //apply theme to the page
-function applyTheme() {
-    let theme = getTheme();
-    if (theme === "light") {
-        document.documentElement.classList.remove("dark");
-        } else {
-        document.documentElement.classList.add("dark");
-    }
+function applyTheme(theme, oldTheme) {
+    //setTheme(theme);
+    if (oldTheme) {
+        document.querySelector("html").classList.remove(oldTheme);
+    } 
+    document.querySelector("html").classList.add(theme);
+
     document
     .querySelector("#themeButton")
     .querySelector("span").textContent = theme == "light" ? "Dark" : "Light";

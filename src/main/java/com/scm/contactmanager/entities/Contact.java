@@ -20,8 +20,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name = "contact")   
-@Table(name = "contacts")
+@Entity 
+@Table
 @Getter
 @Setter
 @AllArgsConstructor 
@@ -31,7 +31,7 @@ public class Contact {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private int id;
+    private long id;
     private String name;    
     private String email;
     private String phoneNumber;
@@ -40,8 +40,8 @@ public class Contact {
     @Column(length = 1000)
     private String about;
     private boolean favorite = false;
-    private String work;
-    private String link;
+    private String website;
+    private String linkedin;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")

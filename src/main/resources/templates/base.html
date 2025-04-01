@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" th:fragment="parent(title, content)" xmlns:th="http://www.thymeleaf.org" >
+<html class ="" lang="en" th:fragment="parent(title, content)" xmlns:th="http://www.thymeleaf.org" >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,13 +19,21 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" 
     />
 </head>
-<body class="dark:bg-gray-800 dark:text-white">
+<body class="text-gray-900 bg-gray-100 dark:bg-gray-800 dark:text-white">
     <!-- Nav bar fragmant -->
-    <div th:replace="navbar :: navbar"></div>
+    <div th:if="${loggedInUser}">
+        <div th:replace="~{user/user_navbar :: navbar}"></div>
+    </div>
+    
+    <div th:unless="${loggedInUser}">
+        <div th:replace="~{navbar :: navbar}"></div>
+    </div> 
+    
+    <!-- <div th:replace="navbar :: navbar"></div> -->
 
     <!-- Main content fragment -->
-    <div class="p-4 bg-gray-100 dark:bg-gray-800">
-        <section id="content" th:replace="${content}"></section>
+    <div class="">
+        <section th:replace="${content}"></section>
     </div>
 
     <!-- Footer -->
@@ -35,5 +43,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script th:src="@{/js/script.js}"></script>
+    
 </body>
 </html>

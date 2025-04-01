@@ -8,7 +8,7 @@
     <div id="content">
         
 
-        <div class="flex justify-center items-center min-h-screen">
+        <div class="flex justify-center items-center min-h-screen mt-4">
             <div class="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
             <form th:action="@{'/do-register'}" method="post" th:object="${userForm}" class="space-y-6" novalidate>
 
@@ -79,51 +79,6 @@
 
                 <script>
 
-                    // const passwordField = document.getElementById('password');
-                    // const confirmPasswordField = document.getElementById('confirm-password');
-                    // const messageElement = document.getElementById('password-message');
-                    // const submitButton = document.querySelector('button[type="submit"]');
-            
-                    // submitButton.disabled = false;
-            
-                    // passwordField.addEventListener('input', validatePassword);
-                    // confirmPasswordField.addEventListener('input', validatePassword);
-                    // let validPassword = false;
-            
-                    // function validatePassword() {
-                    //     if (passwordField.value !== confirmPasswordField.value) {
-                    //         messageElement.textContent = 'Passwords do not match.';
-                    //         // messageElement.style.color = 'red';
-                    //         validPassword = false;
-                    //     } else {
-                    //         messageElement.textContent = 'Passwords match!';
-                    //         messageElement.style.color = 'green';
-                    //         validPassword = true;
-                    //     }
-                    //     toggleSubmitButton();
-                    // }       
-                    
-                    // const phoneField = document.getElementById('phone');
-                    // const phoneMessage = document.getElementById('phone-message');
-                    // let validPhoneNumber = false;
-                    // phoneField.addEventListener('input', validatePhoneNumber);
-            
-                    // function validatePhoneNumber() {
-                    //     const phoneRegex = /^\d{10}$/;
-                    //     if (!phoneRegex.test(phoneField.value)) {
-                    //         phoneMessage.textContent = 'Phone number must be 10 digits.';
-                    //         // phoneMessage.style.color = 'red';
-                    //         validPhoneNumber = false;
-                    //     } else {
-                    //         phoneMessage.textContent = '';
-                    //         validPhoneNumber = true;
-                    //     }
-                    //     toggleSubmitButton();
-                    // }
-            
-                    // function toggleSubmitButton() {
-                    //     submitButton.disabled = !(validPassword && validPhoneNumber);
-                    // }
                     const passwordField = document.getElementById('password');
                     const confirmPasswordField = document.getElementById('confirm-password');
                     const messageElement = document.getElementById('password-message');
