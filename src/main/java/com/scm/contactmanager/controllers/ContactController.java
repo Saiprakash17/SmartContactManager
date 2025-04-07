@@ -1,5 +1,6 @@
 package com.scm.contactmanager.controllers;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,5 +113,25 @@ public class ContactController {
                         .type(MessageType.green)
                         .build());
         return "redirect:/user/contacts/add";
+    }
+
+    @RequestMapping("/view")
+    public String viewContacts(Model model, Authentication authentication){
+
+        //get user
+        String username = UserHelper.getEmailOfLoggedInUser(authentication);
+        User user = userService.getUserByEmail(username);
+
+        //get all contacts by user id
+        List<Contact> contacts = contactService.getByUser(user);
+        //List<Contact> contacts = contactService.getAllContactsByUserId(user.getId());
+        // for (Contact contact : contacts) {
+        //     System.out.println(contact.getName() + " " + contact.getEmail() + " " + contact.getPhoneNumber());
+        // }
+
+        //add contacts to model
+        model.addAttribute("contacts", contacts);
+        model.addAttribute("user", user);
+        return "user/view_contacts";
     }
 }

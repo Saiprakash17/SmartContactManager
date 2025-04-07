@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.scm.contactmanager.entities.Contact;
+import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.helper.ResourseNotFoundException;
 import com.scm.contactmanager.repositories.ContactRepo;
 import com.scm.contactmanager.services.ContactService;
@@ -63,5 +64,10 @@ public class ContactServiceImpl implements ContactService {
     //     // TODO Auto-generated method stub
     //     throw new UnsupportedOperationException("Unimplemented method 'getAllFavoriteContactsByUserId'");
     // }
+
+    @Override
+    public List<Contact> getByUser(User user) {
+        return contactRepo.findByUser(user);
+    }
 
 }

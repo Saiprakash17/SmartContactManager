@@ -3,6 +3,7 @@ package com.scm.contactmanager.services;
 import java.util.List;
 
 import com.scm.contactmanager.entities.Contact;
+import com.scm.contactmanager.entities.User;
 
 public interface ContactService {
 
@@ -27,5 +28,5 @@ public interface ContactService {
     //get all favorite contacts by user id
     // List<Contact> getAllFavoriteContactsByUserId(String userId);
 
-
+    List<Contact> getByUser(User user);
 }
