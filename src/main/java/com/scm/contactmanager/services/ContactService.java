@@ -2,6 +2,8 @@ package com.scm.contactmanager.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 
@@ -28,5 +30,5 @@ public interface ContactService {
     //get all favorite contacts by user id
     // List<Contact> getAllFavoriteContactsByUserId(String userId);
 
-    List<Contact> getByUser(User user);
+    Page<Contact> getByUser(User user, int pageNumber, int pageSize, String sortBy, String sortDir);
 }

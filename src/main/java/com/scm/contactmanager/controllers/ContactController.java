@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,11 +12,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.forms.ContactForm;
+import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.helper.UserHelper;
@@ -116,21 +119,28 @@ public class ContactController {
     }
 
     @RequestMapping("/view")
-    public String viewContacts(Model model, Authentication authentication){
+    public String viewContacts(@RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = AppConstants.PAGE_SIZE + "") int size,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction,
+            Model model, Authentication authentication){
 
         //get user
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
 
         //get all contacts by user id
-        List<Contact> contacts = contactService.getByUser(user);
+        Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
+        //List<Contact> contacts = contactsPage.getContent();
         //List<Contact> contacts = contactService.getAllContactsByUserId(user.getId());
         // for (Contact contact : contacts) {
         //     System.out.println(contact.getName() + " " + contact.getEmail() + " " + contact.getPhoneNumber());
         // }
 
         //add contacts to model
-        model.addAttribute("contacts", contacts);
+        // model.addAttribute("contacts", contacts);
+        model.addAttribute("contactsPage", contactsPage);
+        model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
         model.addAttribute("user", user);
         return "user/view_contacts";
     }

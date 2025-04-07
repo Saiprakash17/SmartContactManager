@@ -3,6 +3,11 @@ package com.scm.contactmanager.services.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 import com.scm.contactmanager.entities.Contact;
@@ -66,8 +71,9 @@ public class ContactServiceImpl implements ContactService {
     // }
 
     @Override
-    public List<Contact> getByUser(User user) {
-        return contactRepo.findByUser(user);
+    public Page<Contact> getByUser(User user, int pageNumber, int pageSize, String sortBy, String sortDir) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy));
+        return contactRepo.findByUser(user, pageable);
     }
 
 }
