@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="base :: parent(~{::title}, ~{::#content})">
+<html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
     <title th:text="${loggedInUser.getName()}+' | Contact Manager'">Profile page</title>
 </head>
@@ -16,9 +16,10 @@
             <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
             </div>
             
-        </div>
-            
-        
+        </div>  
     </div>
+    <script>
+        console.log("this is add profile page");
+    </script>
 </body>
 </html>

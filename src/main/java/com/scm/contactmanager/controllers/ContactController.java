@@ -1,5 +1,7 @@
 package com.scm.contactmanager.controllers;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,7 @@ import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.helper.UserHelper;
 import com.scm.contactmanager.services.ContactService;
+import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -31,6 +34,9 @@ public class ContactController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ImageService imageService;
 
     @RequestMapping("/add")
     public String addContactView(Model model) {
@@ -58,9 +64,11 @@ public class ContactController {
 
             return "user/add_contact";
         }
+
         //get user
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
+
         //Form to address
         Address address = new Address();
         address.setStreet(contactForm.getStreet());
@@ -68,6 +76,7 @@ public class ContactController {
         address.setState(contactForm.getState());
         address.setZipCode(contactForm.getZipCode());
         address.setCountry(contactForm.getCountry());
+
         //Form to contact
         Contact contact = new Contact();
         contact.setName(contactForm.getName());
@@ -80,6 +89,19 @@ public class ContactController {
         contact.setWebsite(contactForm.getWebsiteLink());
         contact.setUser(user);
 
+        // Process image
+        // Check if the image is not null and not empty
+        if(contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
+            // Generate a unique file name using UUID
+            String fileName = UUID.randomUUID().toString();
+            String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
+            // Set the image URL in the contact object
+            contact.setImageUrl(fileURL);
+            // Set the public ID for the image in Cloudinary
+            contact.setCloudinaryImagePublicId(fileName);
+            System.out.println("Image uploaded successfully: " + fileURL);
+        }
+        
         // Save the contact
         Contact savedContact = contactService.saveContact(contact);
         System.out.println("Contact saved: " + savedContact);

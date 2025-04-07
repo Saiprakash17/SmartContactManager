@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="base :: parent(~{::title}, ~{::#content})">
+<html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
     <title>Contact us page</title>
 </head>
@@ -8,5 +8,8 @@
         <h1 style="font-size: large;">This is Contact us page.</h1>
         <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
     </div>
+    <script>
+        console.log("this is add contact us page");
+    </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" th:replace="base :: parent(~{::title}, ~{::#content})">
+<html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
     <title th:text="${loggedInUser.getName()}+' | Contact Manager'">Dashboard page</title>
 </head>
@@ -272,7 +272,7 @@
                           data-th-if="${#fields.hasErrors('contactImage')}"
                           data-th-errors="*{contactImage}"
                         >
-                          Invalid Name
+                          Invalid Image
                         </p>
       
                         <img
@@ -306,6 +306,7 @@
                           Add Contact
                         </button>
                         <button
+                          id="reset_button"
                           type="reset"
                           class="px-3 py-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
@@ -320,5 +321,10 @@
         </div>
         
     </div>
+
+    <script th:src="@{'/js/user.js'}"></script>
+    <script>
+      console.log("this is add contact page");
+    </script>
 </body>
 </html>
