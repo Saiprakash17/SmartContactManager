@@ -31,4 +31,10 @@ public interface ContactService {
     // List<Contact> getAllFavoriteContactsByUserId(String userId);
 
     Page<Contact> getByUser(User user, int pageNumber, int pageSize, String sortBy, String sortDir);
+
+    Page<Contact> searchByName(String keyword, int size, int page, String sortBy, String direction, User user);
+
+    Page<Contact> searchByEmail(String keyword, int size, int page, String sortBy, String direction, User user);
+
+    Page<Contact> searchByPhoneNumber(String keyword, int size, int page, String sortBy, String direction, User user);
 }

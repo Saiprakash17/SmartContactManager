@@ -1,8 +1,8 @@
 package com.scm.contactmanager.controllers;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -18,6 +18,7 @@ import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.forms.ContactForm;
+import com.scm.contactmanager.forms.ContactsSearchForm;
 import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
@@ -32,6 +33,8 @@ import jakarta.validation.Valid;
 @Controller
 @RequestMapping("user/contacts")
 public class ContactController {
+
+    Logger logger = org.slf4j.LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private ContactService contactService;
@@ -142,6 +145,53 @@ public class ContactController {
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
         model.addAttribute("user", user);
+        model.addAttribute("contactSearchForm", new ContactsSearchForm());
+        return "user/view_contacts";
+    }
+
+    @RequestMapping("/search")
+    public String SearchHandler(
+        @ModelAttribute ContactsSearchForm contactSearchForm,
+        @RequestParam(value = "size", defaultValue = AppConstants.PAGE_SIZE + "") int size,
+        @RequestParam(value = "page", defaultValue = "0") int page,
+        @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+        @RequestParam(value = "direction", defaultValue = "asc") String direction,
+        Model model,
+        Authentication authentication,
+        HttpSession session
+    ) {
+        logger.info("field {} keyword {}", contactSearchForm.getField(), contactSearchForm.getKeyword());
+
+        var user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
+
+        Page<Contact> contactsPage = null;
+        if (contactSearchForm.getField().equalsIgnoreCase("name")) {
+            contactsPage = contactService.searchByName(contactSearchForm.getKeyword(), size, page, sortBy, direction,
+                    user);
+        } else if (contactSearchForm.getField().equalsIgnoreCase("email")) {
+            contactsPage = contactService.searchByEmail(contactSearchForm.getKeyword(), size, page, sortBy, direction,
+                    user);
+        } else if (contactSearchForm.getField().equalsIgnoreCase("phone")) {
+            contactsPage = contactService.searchByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy,
+                    direction, user);
+        } else {
+            // Default to fetching all contacts if no specific field is selected
+            contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
+            session.setAttribute("message",
+                    Message.builder()
+                            .content("Please select a field to search")
+                            .type(MessageType.red)
+                            .build());
+        }
+
+        logger.info("contactsPage {}", contactsPage);
+
+        model.addAttribute("contactSearchForm", contactSearchForm);
+
+        model.addAttribute("contactsPage", contactsPage);
+
+        model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
+
         return "user/view_contacts";
     }
 }
