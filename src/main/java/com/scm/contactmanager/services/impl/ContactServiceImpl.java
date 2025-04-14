@@ -56,6 +56,10 @@ public class ContactServiceImpl implements ContactService {
         existingContact.setAbout(contact.getAbout());
         existingContact.setAddress(contact.getAddress());
         existingContact.setFavorite(contact.isFavorite());
+        existingContact.setLinkedin(contact.getLinkedin());
+        existingContact.setWebsite(contact.getWebsite());
+        existingContact.setCloudinaryImagePublicId(contact.getCloudinaryImagePublicId());
+        existingContact.setUser(contact.getUser());
         return contactRepo.save(existingContact);
     }
 

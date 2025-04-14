@@ -100,7 +100,9 @@
                                     </a>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div data-th-if="*{favorite}" class="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div>
+                                    <div data-th-if="*{favorite}"  class="flex items-center">
+                                        <i class="fa-solid fa-heart" style="color: #ed3535;"></i>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
 
@@ -110,12 +112,12 @@
                                     </button>
 
                                     <!-- update contact -->
-                                    <a>
-                                        <i class="fa-solid w-6 h-6 fa-pen"></i
-                                    ></a>
+                                    <a th:href="@{'/user/contacts/edit/'+*{id}}">
+                                        <i class="fa-solid w-6 h-6 fa-pen"></i>
+                                    </a>
 
                                     <!-- delete contact -->
-                                    <button >
+                                    <button th:data-id="${c.id}" onclick="deleteContact(getAttribute('data-id'))">
                                         <i class="fa-solid w-6 h-6 fa-trash"></i>
                                     </button>
 

@@ -45,7 +45,7 @@ async function loadContactdata(id) {
     const data = await (await fetch(`${baseURL}/api/contact/${id}`)).json();
     document.querySelector("#contact_name").innerHTML = data.name;
     document.querySelector("#contact_email").innerHTML = data.email;
-    document.querySelector("#contact_image").src = data.picture;
+    document.querySelector("#contact_image").src = data.imageUrl;
     let address = data.address.street + ", " + data.address.city + ", " + data.address.state + ", " + data.address.country + ", " + data.address.zipCode;
     document.querySelector("#contact_address").innerHTML = address;
     document.querySelector("#contact_phone").innerHTML = data.phoneNumber;
@@ -67,3 +67,21 @@ async function loadContactdata(id) {
     console.log("Error: ", error);
   }
 }
+
+async function deleteContact(id) {
+    console.log("delete contact called", id);
+    Swal.fire({
+      title: "Do you want to delete the contact?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      confirmButtonColor: "#336eff",
+      cancelButtonColor: "#e71518"
+
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const url = `${baseURL}/user/contacts/delete/` + id;
+        window.location.replace(url);
+      }
+    });
+  }

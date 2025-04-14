@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -193,5 +194,117 @@ public class ContactController {
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
 
         return "user/view_contacts";
+    }
+
+    @RequestMapping("/delete/{contactId}")
+    public String deleteContact(@PathVariable("contactId") String contactId, HttpSession session) {
+        // Delete the contact
+        Long contactIdLong = Long.parseLong(contactId);
+        contactService.deleteContact(contactIdLong);
+        session.setAttribute("message",
+                Message.builder()
+                        .content("Contact deleted successfully")
+                        .type(MessageType.green)
+                        .build());
+        return "redirect:/user/contacts/view";
+    }
+
+    @RequestMapping("/edit/{contactId}")
+    public String editContact(@PathVariable("contactId") String contactId, Model model) {
+        // Get the contact by ID
+        Long contactIdLong = Long.parseLong(contactId);
+        Contact contact = contactService.getContactById(contactIdLong);
+
+        // Create a ContactForm object and populate it with the contact's data
+        ContactForm contactForm = new ContactForm();
+        contactForm.setName(contact.getName());
+        contactForm.setEmail(contact.getEmail());
+        contactForm.setPhoneNumber(contact.getPhoneNumber());
+        contactForm.setStreet(contact.getAddress().getStreet());
+        contactForm.setCity(contact.getAddress().getCity());
+        contactForm.setState(contact.getAddress().getState());
+        contactForm.setZipCode(contact.getAddress().getZipCode());
+        contactForm.setCountry(contact.getAddress().getCountry());
+        contactForm.setDescription(contact.getAbout());
+        contactForm.setLinkedInLink(contact.getLinkedin());
+        contactForm.setWebsiteLink(contact.getWebsite());
+        contactForm.setPicture(contact.getImageUrl());
+
+        // Add the ContactForm object to the model
+        model.addAttribute("contactId", contactIdLong);
+        model.addAttribute("contactForm", contactForm);
+        return "user/edit_contact";
+    }
+
+    @RequestMapping("/update_contact/{contactId}")
+    public String updateContact(@PathVariable("contactId") String contactId,
+            @Valid @ModelAttribute ContactForm contactForm,
+            BindingResult result,
+            Authentication authentication,
+            HttpSession session) {
+        // Logic to update the contact
+
+        if (result.hasErrors()) {
+            System.out.println("Errors in form");
+            // Handle the errors
+            session.setAttribute("message", Message.builder()
+                    .content("Please correct the following errors")
+                    .type(MessageType.red)
+                    .build());
+
+            return "user/edit_contact";
+        }
+
+        //get user
+        String username = UserHelper.getEmailOfLoggedInUser(authentication);
+        User user = userService.getUserByEmail(username);
+
+        //Form to address
+        Address address = new Address();
+        address.setStreet(contactForm.getStreet());
+        address.setCity(contactForm.getCity());
+        address.setState(contactForm.getState());
+        address.setZipCode(contactForm.getZipCode());
+        address.setCountry(contactForm.getCountry());
+
+        //Form to contact
+        Contact contact = contactService.getContactById(Long.parseLong(contactId));
+        contact.setName(contactForm.getName());
+        contact.setEmail(contactForm.getEmail());
+        contact.setPhoneNumber(contactForm.getPhoneNumber());
+        contact.setFavorite(contactForm.isFavorite());
+        contact.setAddress(address);
+        contact.setAbout(contactForm.getDescription());
+        contact.setLinkedin(contactForm.getLinkedInLink());
+        contact.setWebsite(contactForm.getWebsiteLink());
+        
+
+        // Process image
+        // Check if the image is not null and not empty
+        if (contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
+            // Generate a unique file name using UUID
+            String fileName = UUID.randomUUID().toString();
+            String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
+            // Set the image URL in the contact object
+            contact.setImageUrl(fileURL);
+            // Set the public ID for the image in Cloudinary
+            contact.setCloudinaryImagePublicId(fileName);
+            System.out.println("Image uploaded successfully: " + fileURL);
+        }
+        else{
+            logger.info("Image not uploaded, using existing image");
+        }
+
+        // Update the contact
+        Contact updatedContact = contactService.updateContact(contact);
+
+        logger.info("Contact updated: " + updatedContact);
+
+        session.setAttribute("message",
+                Message.builder()
+                        .content("You have successfully updated the contact")
+                        .type(MessageType.green)
+                        .build());
+        return "redirect:/user/contacts/view";
     }
 }

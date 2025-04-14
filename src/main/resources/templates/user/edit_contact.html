@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title th:text="${loggedInUser.getName()}+' | Contact Manager'">Dashboard page</title>
+    <title th:text="${loggedInUser.getName()}+' | Contact Manager'">Edit Contact Page</title>
 </head>
 <body>
     <div id="content">
@@ -18,9 +18,9 @@
                   >
 
                     <div data-th-replace="message::message"></div>
-                    <h1 class="text-2xl font-semibold">Add New Contact</h1>
+                    <h1 class="text-2xl font-semibold">Edit Contact</h1>
                     <p class="text-gray-500">
-                      Fill the form below to add a new contact to your list.
+                      Edit the form below to update the contact.
                     </p>
 
                     
@@ -28,7 +28,7 @@
                     <form
                       action=""
                       class="mt-8"
-                      data-th-action="@{'/user/contacts/add'}"
+                      data-th-action="@{'/user/contacts/update_contact/' + ${contactId}}"
                       data-th-object="${contactForm}"
                       method="post"
                       enctype="multipart/form-data"
@@ -259,7 +259,7 @@
       
                         <img
                           class="max-h-52 mx-auto rounded-lg shadow m-3"
-                          src=""
+                          th:src="*{picture}"
                           id="upload_image_preview"
                           alt=""
                         />
@@ -285,7 +285,7 @@
                           type="submit"
                           class="px-3 py-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
-                          Add Contact
+                          Update
                         </button>
                         <button
                           id="reset_button"
@@ -306,7 +306,7 @@
 
     <script th:src="@{'/js/user.js'}"></script>
     <script>
-      console.log("this is add contact page");
+      console.log("this is edit contact page");
     </script>
 </body>
 </html>
