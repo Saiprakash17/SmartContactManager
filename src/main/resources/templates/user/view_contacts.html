@@ -20,38 +20,45 @@
 
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
 
-                    <form th:object="${contactSearchForm}" th:action="@{'/user/contacts/search'}"> 
-                        <div class="flex p-5 space-x-2 items-center justify-start flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-3 bg-white dark:bg-gray-900">
-                            <div>
-                                <select th:field="*{field}" id="countries" class="py-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option selected value="">Select a field</option>
-                                    <option value="name">Name</option>
-                                    <option value="phone">Phone</option>
-                                    <option value="email">Email</option>
-                                </select>
-                            </div>
-                            <label for="table-search" class="sr-only">Search</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                    </svg>
+                    <div class="flex items-center justify-between px-4 bg-white dark:bg-gray-800">
+                        <form th:object="${contactSearchForm}" th:action="@{'/user/contacts/search'}"> 
+                            <div class="flex p-5 space-x-2 items-center justify-start flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-3 bg-white dark:bg-gray-900">
+                                <div>
+                                    <select th:field="*{field}" id="countries" class="py-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                        <option selected value="">Select a field</option>
+                                        <option value="name">Name</option>
+                                        <option value="phone">Phone</option>
+                                        <option value="email">Email</option>
+                                    </select>
                                 </div>
-                                <input th:field="*{keyword}" type="text" id="table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
+                                <label for="table-search" class="sr-only">Search</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                        </svg>
+                                    </div>
+                                    <input th:field="*{keyword}" type="text" id="table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
+                                </div>
+                                <button type="submit" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">
+                                    Search
+                                </button>
+                                <div th:replace="message :: message"></div>
                             </div>
-                            <button type="submit" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">
-                                Search
+                        </form>
+                        <div>
+                            <button type="button" onclick="exportData()" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">
+                                Export to CSV
                             </button>
-                            <div th:replace="message :: message"></div>
                         </div>
-                    </form>
-                    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                    </div>
+                    <table class="text-center w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" class="p-4">
                                     <div class="flex items-center">
-                                        <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                        <label for="checkbox-all-search" class="sr-only">checkbox</label>
+                                        <input id="checkbox-all" type="checkbox" onclick="selectall()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                        <label for="checkbox-all" class="sr-only">checkbox</label>
                                     </div>
                                 </th>
                                 <th scope="col" class="px-6 py-3">
@@ -75,17 +82,17 @@
                             <tr th:object="${c}" th:each="c : ${contactsPage.content}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 <td class="w-4 p-4">
                                     <div class="flex items-center">
-                                        <input id="checkbox-table-search-1" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                        <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+                                        <input id="checkbox-table" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                        <label for="checkbox-table" class="sr-only">checkbox</label>
                                     </div>
                                 </td>
-                                <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
+                                <td scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
                                     <img onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'" class="w-10 h-10 rounded-full" th:src="@{*{imageUrl}}" alt="Jese image">
-                                    <div class="ps-3">
+                                    <div class="ps-4">
                                         <div class="text-base font-semibold" th:text="*{name}"></div>
                                         <div class="font-normal text-gray-500" th:text="*{email}"></div>
                                     </div>  
-                                </th>
+                                </td>
                                 <td class="px-6 py-4">
                                     <i class="fa-solid fa-phone"></i>
                                     <span class="text-base font-semibold" th:text="*{phoneNumber}"></span>
@@ -100,7 +107,7 @@
                                     </a>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div data-th-if="*{favorite}"  class="flex items-center">
+                                    <div data-th-if="*{favorite}"  class="items-center">
                                         <i class="fa-solid fa-heart" style="color: #ed3535;"></i>
                                     </div>
                                 </td>
@@ -121,6 +128,12 @@
                                         <i class="fa-solid w-6 h-6 fa-trash"></i>
                                     </button>
 
+                                </td>
+                                <td style="display: none;">
+                                    <span th:text="*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}"></span>
+                                </td>
+                                <td style="display: none;">
+                                    <span th:text="*{about}"></span>
                                 </td>
                             </tr>
                         </tbody>
@@ -176,9 +189,75 @@
         </div>  
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@linways/table-to-excel@1.0.4/dist/tableToExcel.min.js"></script>
     <script th:src="@{/js/contacts.js}"></script>
     <script>
         console.log("this is add Contacts page");
+        function exportData() {
+            console.log("Exporting data to CSV...");
+            const table = document.querySelector("table");
+            const checkboxes = table.querySelectorAll("tbody input[type='checkbox']:checked");
+            const rows = Array.from(checkboxes).map(checkbox => checkbox.closest("tr"));
+
+            if (rows.length === 0) {
+                alert("No rows selected for export.");
+                return;
+            }
+
+            const customTable = document.createElement("table");
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+
+            // Define custom headers
+            ["Name", "Email", "Phone", "Address", "Links", "About", "Image", "Favorite"].forEach(headerText => {
+                const th = document.createElement("th");
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            customTable.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+
+            rows.forEach(row => {
+                const name = row.querySelector("td:nth-child(2) div.text-base")?.textContent.trim() || "N/A";
+                const email = row.querySelector("td:nth-child(2) div.font-normal")?.textContent.trim() || "N/A";
+                const phone = row.querySelector("td:nth-child(3) span").textContent.trim();
+                const address = row.querySelector("td:nth-child(7) span")?.textContent.trim() || "N/A";
+                const about = row.querySelector("td:nth-child(8) span")?.textContent.trim() || "N/A";
+                const links = Array.from(row.querySelectorAll("td:nth-child(4) a"))
+                    .map(link => link.href)
+                    .join(", ") || "N/A";
+                const imageUrl = row.querySelector("td:nth-child(2) img").src;
+                const image = imageUrl.includes("cloudinary") ? imageUrl : "N/A";
+                const favorite = row.querySelector("td:nth-child(5) i.fa-heart") ? "Yes" : "No";
+                const customRow = document.createElement("tr");
+
+                [name, email, phone, address, links, about, image, favorite].forEach(cellText => {
+                    const td = document.createElement("td");
+                    td.textContent = cellText;
+                    customRow.appendChild(td);
+                });
+
+                tbody.appendChild(customRow);
+            });
+
+            customTable.appendChild(tbody);
+
+            TableToExcel.convert(customTable, {
+                name: "Selected_Contacts.xlsx",
+                sheet: {
+                    name: "Contacts"
+                }
+            });
+        }
+        function selectall() {
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !checkbox.checked;
+            });
+        }
     </script>
 </body>
 </html>
