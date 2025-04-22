@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.ResourseNotFoundException;
+import com.scm.contactmanager.helper.UserHelper;
 import com.scm.contactmanager.repositories.UserRepo;
+import com.scm.contactmanager.services.EmailService;
 import com.scm.contactmanager.services.UserService;
 
 @Service
@@ -24,6 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
     
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -38,8 +43,18 @@ public class UserServiceImpl implements UserService {
 
         //role setting
         user.setRoles(List.of(AppConstants.ROLE_USER));
+        
+
+        String verifyToken = UUID.randomUUID().toString();
+        user.setVerifyToken(verifyToken);
+
         logger.info("User saved successfully");
-        return userRepo.save(user);
+        User savedUser = userRepo.save(user);
+
+        emailService.sendEmail(savedUser.getEmail(), "Verify your email", 
+        "Click on the link to verify your email: " + UserHelper.getLinkForUserVerification(savedUser.getEmail(), verifyToken));
+        
+        return savedUser;
     }
 
     @Override
@@ -92,7 +107,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByEmail(String email) {
         return userRepo.findByEmail(email).orElse(null);
-    }  
+    }
 
+    @Override
+    public User getUserByEmailAndVerifyToken(String email,String token) {
+        User user = userRepo.findByEmailAndVerifyToken(email, token).orElse(null);
+        return user;
+    }  
 
 }

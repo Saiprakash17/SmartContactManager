@@ -135,14 +135,7 @@ public class ContactController {
 
         //get all contacts by user id
         Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
-        //List<Contact> contacts = contactsPage.getContent();
-        //List<Contact> contacts = contactService.getAllContactsByUserId(user.getId());
-        // for (Contact contact : contacts) {
-        //     System.out.println(contact.getName() + " " + contact.getEmail() + " " + contact.getPhoneNumber());
-        // }
-
-        //add contacts to model
-        // model.addAttribute("contacts", contacts);
+    
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
         model.addAttribute("user", user);
@@ -236,7 +229,7 @@ public class ContactController {
         return "user/edit_contact";
     }
 
-    @RequestMapping("/update_contact/{contactId}")
+    @RequestMapping(value = "/update_contact/{contactId}", method = RequestMethod.POST)
     public String updateContact(@PathVariable("contactId") String contactId,
             @Valid @ModelAttribute ContactForm contactForm,
             BindingResult result,

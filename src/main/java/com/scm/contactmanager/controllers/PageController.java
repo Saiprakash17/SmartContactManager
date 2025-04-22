@@ -103,9 +103,7 @@ public class PageController {
             return "register";
         }
 
-        if(userForm.getPassword().equals(userForm.getConfirmPassword())) {
-            System.out.println("Password and Confirm Password are same");
-        } else {
+        if(!userForm.getPassword().equals(userForm.getConfirmPassword())) {
             System.out.println("Password and Confirm Password are not same");
             Message message = Message.builder().content("Password and Confirm Password are not same").type(MessageType.red).build();
             session.setAttribute("message", message);
@@ -120,15 +118,17 @@ public class PageController {
         user.setImageUrl(null);
         user.setAbout(userForm.getAbout());
         user.setPhoneNumber(userForm.getPhoneNumber());
-
-        //resisteration message
-        Message message = Message.builder().content("Registration Successful").type(MessageType.green).build();
-        session.setAttribute("message", message);
+        user.setEnabled(false);
 
         User savedUser = userService.saveUser(user);
         System.out.println("Saved User: " + savedUser);
 
+        //resisteration message
+        Message message = Message.builder().content("Registration Successful!! Verify your email. Link sent to your email").type(MessageType.green).build();
+        session.setAttribute("message", message);
+
         System.out.println("End Register User");
-        return "redirect:/register";
+
+        return "redirect:/login";
     }
 }

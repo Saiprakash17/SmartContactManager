@@ -22,6 +22,9 @@ public class SecurityConfig {
     @Autowired
     private OAuthAuthenticationSuccessHandler oAuthAuthenticationSuccessHandler;
 
+    @Autowired
+    private AuthFailtureHandler authFailtureHandler;
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         
@@ -39,8 +42,6 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(authorize ->
                 authorize
                         .requestMatchers("/user/**").authenticated()
-                        //.requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        //.requestMatchers("/home", "/register", "/login", "/services").permitAll()
                         .anyRequest().permitAll()
         );
 
@@ -49,10 +50,9 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .loginProcessingUrl("/authenticate")
                         .defaultSuccessUrl("/user/dashboard", true)
-                        // .failureUrl("/login?error=true")
                         .usernameParameter("email")
                         .passwordParameter("password")
-                        //.permitAll()
+                        .failureHandler(authFailtureHandler)
         );
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);

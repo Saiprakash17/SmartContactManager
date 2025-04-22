@@ -2,6 +2,9 @@ package com.scm.contactmanager.forms;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.scm.contactmanager.validators.ValidFile;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -65,6 +68,7 @@ public class ContactForm {
     
     private String linkedInLink;
 
+    @ValidFile(message = "Invalid file", checkEmpty = false)
     private MultipartFile contactImage;
 
     // This field will be populated after image upload

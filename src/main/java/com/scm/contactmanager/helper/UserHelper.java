@@ -1,10 +1,7 @@
 package com.scm.contactmanager.helper;
 
-import java.security.Principal;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 public class UserHelper {
@@ -33,5 +30,15 @@ public class UserHelper {
             System.out.println("Getting email from normal login");
             return authentication.getName();
         }
+    }
+
+    public static String getLinkForUserVerification(String email, String verifyToken){
+        StringBuilder link = new StringBuilder();
+        link.append(AppConstants.DOMAIN);
+        link.append("/auth/verify-email?email=");
+        link.append(email);
+        link.append("&token=");
+        link.append(verifyToken);
+        return link.toString();
     }
 }

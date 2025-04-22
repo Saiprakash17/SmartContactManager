@@ -54,7 +54,7 @@ public class User implements UserDetails {
     @Column(name = "phone_number", length = 100)
     private String phoneNumber;
 
-    private boolean enabled = true;
+    private boolean enabled = false;
     private boolean emailVerified = false;
     private boolean phoneVerified = false;
 
@@ -68,6 +68,9 @@ public class User implements UserDetails {
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> roles = new ArrayList<>();
+
+    @Column(name = "user_verify_token", length = 1000)
+    private String verifyToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

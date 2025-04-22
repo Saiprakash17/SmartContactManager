@@ -13,6 +13,9 @@
                 
                 <h5 class="text-xl font-medium text-gray-900 dark:text-white">Login to our platform</h5>
 
+                <!-- Message box -->
+                <div th:replace="message :: message"></div>
+
                 <div class = "text-red-600" th:if="${param.error}">Invalid username and password.</div>
                 <div class = "text-red-600" th:if="${param.logout}">You have been logged out.</div>
                 
