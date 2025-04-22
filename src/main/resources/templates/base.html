@@ -31,15 +31,15 @@
     
     <!-- <div th:replace="navbar :: navbar"></div> -->
 
+    <div th:if="${loggedInUser}">
+        <div th:replace="~{user/sidebar :: sidebar}"></div>
+    </div>
     <!-- Main content fragment -->
-    <div class="">
+    <div th:class="${loggedInUser} ? 'sm:pl-64' : ''" class=" p-4 min-h-screen">
         <section th:replace="${content}"></section>
     </div>
 
-    <!-- Footer -->
-    <footer class="p-4 text-center">
-        <p>&copy; 2025 All rights reserved.</p>
-    </footer>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

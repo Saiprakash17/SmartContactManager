@@ -5,11 +5,8 @@
 </head>
 <body>
     <div id="content">
-        <div th:if="${loggedInUser}">
-            <div data-th-replace="~{user/sidebar :: sidebar}"></div>
-        </div>
 
-        <div class="sm:pl-64 pt-5 min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div class=" pt-5 min-h-screen bg-gray-100 dark:bg-gray-800">
             <div class="max-w-4xl mx-auto px-4 py-8">
                 <!-- Profile Header -->
                 <div class="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -28,7 +25,7 @@
                 </div>
                 <div data-th-replace="message::message"></div>
                 <!-- Profile Content -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div class="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
                     <!-- View Mode -->
                     <div id="viewMode" class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -140,7 +137,7 @@
                 </div>
 
                 <!-- Password Change Section -->
-                <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div class="mt-8 bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white">Change Password</h3>
                     </div>
@@ -172,7 +169,7 @@
                 </div>
 
                 <!-- Danger Zone -->
-                <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div class="mt-8 bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-medium text-red-600 dark:text-red-400">Danger Zone</h3>
                     </div>

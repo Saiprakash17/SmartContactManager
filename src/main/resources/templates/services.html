@@ -1,20 +1,89 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title>Services page</title>
+    <title>Contact Manager - Our Services</title>
 </head>
 <body>
     <div id="content">
         <div th:if="${loggedInUser}">
             <div data-th-replace="~{user/sidebar :: sidebar}"></div>
         </div>
-        <div class="flex items-center justify-center flex-col pt-20">
-            <h1 style="font-size: large;">This is Services page.</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        
+        <div class="container mx-auto px-4 py-12">
+            <section class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-center mb-12">Our Services</h1>
+                </div>
+                
+                
+                <div class="space-y-8">
+                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
+                        <div class="md:flex">
+                            <div class="md:w-1/3 bg-blue-600 dark:bg-blue-800 p-6 flex items-center justify-center">
+                                <i class="fas fa-address-book text-white text-5xl"></i>
+                            </div>
+                            <div class="md:w-2/3 p-6">
+                                <h2 class="text-2xl font-semibold mb-3">Contact Management</h2>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                    Store, organize, and manage all your contacts in one secure location with our intuitive interface.
+                                </p>
+                                <ul class="text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                        <span>Unlimited contacts storage</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                        <span>Advanced search and filtering</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                        <span>Custom tags and categories</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
+                        <div class="md:flex">
+                            <div class="md:w-1/3 bg-purple-600 dark:bg-purple-800 p-6 flex items-center justify-center">
+                                <i class="fas fa-sync-alt text-white text-5xl"></i>
+                            </div>
+                            <div class="md:w-2/3 p-6">
+                                <h2 class="text-2xl font-semibold mb-3">Contact Sync</h2>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                    Keep your contacts synchronized across all your devices automatically.
+                                </p>
+                                <ul class="text-gray-600 dark:text-gray-300 space-y-2">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                        <span>Real-time updates across devices</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                        <span>Import/export from popular platforms</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                                        <span>Automatic backup and restore</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-8" th:unless="${loggedInUser}">
+                        <a th:href="@{/register}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg inline-block">
+                            Get Started Today
+                        </a>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
     <script>
-        console.log("this is add services page");
+        console.log("Services page loaded");
     </script>
 </body>
 </html>

@@ -1,24 +1,87 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title th:text="${loggedInUser.getName()}+' | Contact Manager'">Dashboard page</title>
+    <title th:text="${loggedInUser.getName()}+' | Dashboard'">Dashboard</title>
 </head>
 <body>
     <div id="content">
-        <div th:if="${loggedInUser}">
-            <div data-th-replace="~{user/sidebar :: sidebar}"></div>
-        </div>
 
-        <div class="sm:pl-64 pt-20" style="height: 1000px">
-            <div class="flex items-center justify-center  flex-col">
-                <h1 style="font-size: large;">This is Dashboard page.</h1>
-                <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        <div class="pt-20 min-h-screen bg-gray-100 dark:bg-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Welcome Header -->
+                <div class="text-center py-12">
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome, <span th:text="${loggedInUser.name}"></span></h1>
+                    <p class="mt-2 text-lg text-gray-600 dark:text-gray-300">Manage your contacts efficiently</p>
+                </div>
+
+                <!-- Action Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-12">
+                    <!-- Profile Card -->
+                    <a th:href="@{/user/profile}" class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+                        <div class="p-6">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">My Profile</h3>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">View and edit your profile information</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- View Contacts Card -->
+                    <a th:href="@{/user/contacts/view}" class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+                        <div class="p-6">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">View Contacts</h3>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Browse your contact list</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Add Contact Card -->
+                    <a th:href="@{/user/contacts/add}" class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+                        <div class="p-6">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Add Contact</h3>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Create a new contact entry</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Sign Out Card -->
+                    <a th:href="@{/logout}" class="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+                        <div class="p-6">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Sign Out</h3>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Securely log out of your account</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
-        
     </div>
     <script>
-        console.log("this is add dashboard page");
+        console.log("Dashboard page loaded");
+        // Add any dashboard-specific JavaScript here
     </script>
 </body>
 </html>

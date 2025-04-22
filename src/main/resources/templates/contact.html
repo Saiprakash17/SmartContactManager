@@ -1,20 +1,69 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title>Contact us page</title>
+    <title>Contact Manager - Contact Us</title>
 </head>
 <body>
     <div id="content">
-        <div th:if="${loggedInUser}">
-            <div data-th-replace="~{user/sidebar :: sidebar}"></div>
-        </div>
-        <div class="flex items-center justify-center flex-col pt-20">
-            <h1 style="font-size: large;">This is Contact page.</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-center mb-8">Contact Us</h1>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-8">
+                        <h2 class="text-2xl font-semibold mb-4">Get in Touch</h2>
+                        <form th:action="@{/feedback}" method="post">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="name">Name</label>
+                                <input type="text" id="name" name="name" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="email">Email</label>
+                                <input type="email" id="email" name="email" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="message">Message</label>
+                                <textarea id="message" name="message" rows="4" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-800" required></textarea>
+                            </div>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-8">
+                        <h2 class="text-2xl font-semibold mb-4">Contact Information</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="font-medium">Address</h3>
+                                    <p class="text-gray-600 dark:text-gray-300">123 Business St, Suite 100<br>San Francisco, CA 94107</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-phone-alt text-blue-600 dark:text-blue-400 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="font-medium">Phone</h3>
+                                    <p class="text-gray-600 dark:text-gray-300">+1 (555) 123-4567</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-envelope text-blue-600 dark:text-blue-400 mt-1 mr-3"></i>
+                                <div>
+                                    <h3 class="font-medium">Email</h3>
+                                    <p class="text-gray-600 dark:text-gray-300">support@contactmanager.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script>
-        console.log("this is add contact page");
+        console.log("Contact page loaded");
     </script>
 </body>
 </html>

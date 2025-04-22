@@ -17,6 +17,12 @@ public class EamilServiceImpl implements EmailService {
     @Value("${spring.mail.properties.domain_name}")
     private String domainName;
 
+    @Value("${spring.mail.properties.feedback_to_email}")
+    private String feedbackToEmail;
+
+    @Value("${spring.mail.properties.feedback_from_email}")
+    private String feedbackFromEmail;
+
     @Override
     public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -24,6 +30,19 @@ public class EamilServiceImpl implements EmailService {
         message.setSubject(subject);
         message.setText(body);
         message.setFrom(domainName);
+        eMailSender.send(message);
+    }
+
+    @Override
+    public void sendFeedbackEmail(String from, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        StringBuilder content = new StringBuilder();
+        content.append("Feedback From: ").append(from).append("\n\n");
+        content.append(body);
+        message.setTo(feedbackToEmail);
+        message.setSubject(subject);
+        message.setText(content.toString());
+        message.setFrom(feedbackFromEmail);
         eMailSender.send(message);
     }
 

@@ -1,20 +1,59 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title>Home page</title>
+    <title>Contact Manager - Home</title>
 </head>
 <body>
     <div id="content">
-        <div th:if="${loggedInUser}">
-            <div data-th-replace="~{user/sidebar :: sidebar}"></div>
-        </div>
-        <div class="flex items-center justify-center flex-col pt-20">
-            <h1 style="font-size: large;">This is Home page.</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        
+        <div class="container mx-auto px-4 py-6">
+            <!-- Hero Section -->
+            <section class="text-center py-8">
+                <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    <span th:if="${loggedInUser}">Welcome back, <span th:text="${loggedInUser.name}"></span>!</span>
+                    <span th:unless="${loggedInUser}">Manage Your Contacts Efficiently</span>
+                </h1>
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    A simple yet powerful solution for all your contact management needs
+                </p>
+                <div class="mt-8" th:unless="${loggedInUser}">
+                    <a th:href="@{/login}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg mr-4">
+                        Sign In
+                    </a>
+                    <a th:href="@{/register}" class="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 px-6 py-3 rounded-lg">
+                        Register
+                    </a>
+                </div>
+            </section>
+
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-3 gap-8 mt-16">
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
+                    <div class="text-blue-600 dark:text-blue-400 text-3xl mb-4">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Organize Contacts</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Easily manage all your contacts in one place with powerful categorization.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
+                    <div class="text-blue-600 dark:text-blue-400 text-3xl mb-4">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Quick Search</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Find any contact instantly with our lightning-fast search functionality.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
+                    <div class="text-blue-600 dark:text-blue-400 text-3xl mb-4">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Secure Storage</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Your data is encrypted and protected with enterprise-grade security.</p>
+                </div>
+            </div>
         </div>
     </div>
     <script>
-        console.log("this is add home page");
+        console.log("Home page loaded");
     </script>
 </body>
 </html>

@@ -4,7 +4,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.scm.contactmanager.validators.ValidFile;
 
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

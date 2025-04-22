@@ -1,20 +1,47 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title>About page</title>
+    <title>Contact Manager - About Us</title>
 </head>
 <body>
     <div id="content">
-        <div th:if="${loggedInUser}">
-            <div data-th-replace="~{user/sidebar :: sidebar}"></div>
-        </div>
-        <div class="flex items-center justify-center flex-col pt-20">
-            <h1 style="font-size: large;">This is About page.</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        
+        <div class="container mx-auto px-4 py-12">
+            <section class="max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-center mb-8">About Contact Manager</h1>
+                
+                <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-8 mb-8">
+                    <h2 class="text-2xl font-semibold mb-4">Our Story</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Founded in 2023, Contact Manager was born out of frustration with existing contact management solutions. 
+                        We wanted to create something simple yet powerful that anyone could use.
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-300">
+                        Today, we serve thousands of users worldwide who trust us with their important contacts and relationships.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+                        <h3 class="text-xl font-semibold mb-3">Our Mission</h3>
+                        <p class="text-gray-600 dark:text-gray-300">
+                            To simplify contact management while providing powerful tools to help you nurture your professional 
+                            and personal relationships.
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+                        <h3 class="text-xl font-semibold mb-3">Our Team</h3>
+                        <p class="text-gray-600 dark:text-gray-300">
+                            We're a small but passionate team of developers and designers committed to building the best 
+                            contact management experience.
+                        </p>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
     <script>
-        console.log("this is add about page");
+        console.log("About page loaded");
     </script>
 </body>
 </html>
