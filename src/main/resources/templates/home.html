@@ -5,8 +5,13 @@
 </head>
 <body>
     <div id="content">
-        <h1 style="font-size: large;">This is Home page.</h1>
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        <div th:if="${loggedInUser}">
+            <div data-th-replace="~{user/sidebar :: sidebar}"></div>
+        </div>
+        <div class="flex items-center justify-center flex-col pt-20">
+            <h1 style="font-size: large;">This is Home page.</h1>
+            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+        </div>
     </div>
     <script>
         console.log("this is add home page");

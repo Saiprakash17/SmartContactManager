@@ -248,10 +248,6 @@ public class ContactController {
             return "user/edit_contact";
         }
 
-        //get user
-        String username = UserHelper.getEmailOfLoggedInUser(authentication);
-        User user = userService.getUserByEmail(username);
-
         //Form to address
         Address address = new Address();
         address.setStreet(contactForm.getStreet());

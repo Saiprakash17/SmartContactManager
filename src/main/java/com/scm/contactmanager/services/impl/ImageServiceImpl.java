@@ -1,7 +1,6 @@
 package com.scm.contactmanager.services.impl;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

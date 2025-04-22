@@ -23,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 @Entity(name = "user")
 @Table(name = "users")
@@ -54,23 +55,31 @@ public class User implements UserDetails {
     @Column(name = "phone_number", length = 100)
     private String phoneNumber;
 
+    @Default
     private boolean enabled = false;
+    @Default
     private boolean emailVerified = false;
+    @Default
     private boolean phoneVerified = false;
 
     @Enumerated(jakarta.persistence.EnumType.STRING)   
     // SELF, GOOGLE, FACEBOOK, GITHUB
+    @Default
     private Providers provider = Providers.SELF;
     private String providerUserId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Default
     private List<Contact> contacts = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @Default
     private List<String> roles = new ArrayList<>();
 
     @Column(name = "user_verify_token", length = 1000)
     private String verifyToken;
+
+    private String cloudinaryImagePublicId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

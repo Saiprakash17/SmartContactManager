@@ -16,4 +16,6 @@ public interface UserService {
     List<User> getAllUsers();
     User getUserByEmail(String email);
     User getUserByEmailAndVerifyToken(String email, String token);
+    boolean validatePassword(User user, String currentPassword);
+    void updatePassword(User user, String newPassword);
 }

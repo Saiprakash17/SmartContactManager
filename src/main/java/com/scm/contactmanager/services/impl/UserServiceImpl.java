@@ -76,6 +76,8 @@ public class UserServiceImpl implements UserService {
         newUser.setPhoneVerified(user.isPhoneVerified());
         newUser.setProvider(user.getProvider());
         newUser.setProviderUserId(user.getProviderUserId());
+        newUser.setVerifyToken(user.getVerifyToken());
+        newUser.setCloudinaryImagePublicId(user.getCloudinaryImagePublicId());
 
         return Optional.ofNullable(userRepo.save(newUser));
 
@@ -113,6 +115,25 @@ public class UserServiceImpl implements UserService {
     public User getUserByEmailAndVerifyToken(String email,String token) {
         User user = userRepo.findByEmailAndVerifyToken(email, token).orElse(null);
         return user;
+    }
+
+    @Override
+    public boolean validatePassword(User user, String currentPassword) {
+        if (user.getPassword() == null || currentPassword == null) {
+            logger.error("User password or current password is null");
+            return false;
+        }
+        return passwordEncoder.matches(currentPassword, user.getPassword());
+    }
+
+    @Override
+    public void updatePassword(User user, String newPassword) {
+        if (newPassword != null && !newPassword.isEmpty()) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepo.save(user);
+        } else {
+            logger.error("New password is null or empty");
+        }
     }  
 
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title th:text="${loggedInUser.getName()}+' | Contact Manager'">Profile page</title>
+    <title th:text="${loggedInUser.getName()}+' | Profile'">Profile page</title>
 </head>
 <body>
     <div id="content">
@@ -9,17 +9,262 @@
             <div data-th-replace="~{user/sidebar :: sidebar}"></div>
         </div>
 
-        <div class="sm:pl-64 pt-20" style="height: 1000px">
+        <div class="sm:pl-64 pt-5 min-h-screen bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <!-- Profile Header -->
+                <div class="flex flex-col md:flex-row items-center justify-between mb-8">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <img th:src="${loggedInUser.imageUrl}" 
+                             onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'"
+                             class="w-16 h-16 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow">
+                        <div class="ml-4">
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white" th:text="${loggedInUser.name}"></h1>
+                            <p class="text-gray-600 dark:text-gray-400" th:text="${loggedInUser.email}"></p>
+                        </div>
+                    </div>
+                    <button onclick="toggleEditMode()" id="editBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200">
+                        Edit Profile
+                    </button>
+                </div>
+                <div data-th-replace="message::message"></div>
+                <!-- Profile Content -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <!-- View Mode -->
+                    <div id="viewMode" class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Personal Information</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
+                                        <p class="text-gray-900 dark:text-white" th:text="${loggedInUser.name}"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                                        <p class="text-gray-900 dark:text-white" th:text="${loggedInUser.email}"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                                        <p class="text-gray-900 dark:text-white" th:text="${loggedInUser.phoneNumber ?: 'Not provided'}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">About</h3>
+                                <p class="text-gray-700 dark:text-gray-300" th:text="${loggedInUser.about ?: 'No information provided'}"></p>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="flex items-center justify-center flex-col">
-                <h1 style="font-size: large;">This is Profile page.</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Provident, eaque.</p>
+                    <!-- Edit Mode (hidden by default) -->
+                    <div id="editMode" class="hidden p-6">
+                        <form th:action="@{/user/profile/update}" 
+                              th:object="${profileForm}" 
+                              method="post" 
+                              enctype="multipart/form-data" 
+                              class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                                    <input type="text" id="name" th:value="${loggedInUser.name}" th:field="*{name}" 
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="mt-1 text-sm text-red-600"></p>
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                                    <input type="email" id="email" th:value="${loggedInUser.email}" 
+                                           readonly
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-gray-100 dark:bg-gray-600">
+                                </div>
+                                <div>
+                                    <label for="phoneNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+                                    <input type="tel" id="phoneNumber" th:value="${loggedInUser.phoneNumber}" th:field="*{phoneNumber}" 
+                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="mt-1 text-sm text-red-600"></p>
+                                </div>
+                                <div>
+                                    <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profile Picture</label>
+                                    <input type="file" id="image" th:field="*{contactImage}"
+                                           class="block w-full text-sm text-gray-500 dark:text-gray-400
+                                                  file:mr-4 file:py-2 file:px-4
+                                                  file:rounded-md file:border-0
+                                                  file:text-sm file:font-semibold
+                                                  file:bg-blue-50 file:text-blue-700 dark:file:bg-gray-700 dark:file:text-gray-300
+                                                  hover:file:bg-blue-100 dark:hover:file:bg-gray-600">
+                                    <img
+                                    class="max-h-52 mx-auto rounded-lg shadow m-3"
+                                    th:src="*{picture}"
+                                    id="upload_image_preview"
+                                    alt=""
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label for="about" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">About</label>
+                                <textarea id="about" th:value="${loggedInUser.about}" th:field="*{about}" rows="4"
+                                          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"></textarea>
+                            </div>
+                            <div>
+                                <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password (for verification)</label>
+                                <input type="password" id="currentPassword" th:field="*{currentPassword}"
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                <p th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}" class="mt-1 text-sm text-red-600"></p>
+                            </div>
+                            <!-- <div>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Change Password</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                                        <input type="password" id="newPassword" th:field="*{newPassword}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                        <p th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}" class="mt-1 text-sm text-red-600"></p>
+                                    </div>
+                                    <div>
+                                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                        <p th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="mt-1 text-sm text-red-600"></p>
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="toggleEditMode()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Change Password</h3>
+                    </div>
+                    <div class="p-6">
+                        <form th:action="@{/user/profile/change-password}" th:object="${changePasswordForm}" method="post" class="space-y-4">
+                            <div>
+                                <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+                                <input type="password" id="currentPassword" name="currentPassword" th:field="*{currentPassword}" required
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                                <input type="password" id="newPassword" name="newPassword" th:field="*{newPassword}" required
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Password must be at least 8 characters</p>
+                            </div>
+                            <div>
+                                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" th:field="*{confirmPassword}" required
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium text-red-600 dark:text-red-400">Danger Zone</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                            <div>
+                                <h4 class="text-base font-medium text-gray-900 dark:text-white">Delete Account</h4>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Once you delete your account, there is no going back. Please be certain.</p>
+                            </div>
+                            <button onclick="confirmDelete()" class="mt-3 sm:mt-0 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-        </div>  
+        </div>
+
+        
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Delete Account</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to delete your account? All your data will be permanently removed.</p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="closeModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Cancel
+                    </button>
+                    <form th:action="@{/user/profile/delete}" method="post" class="inline">
+                        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+
     <script>
-        console.log("this is add profile page");
+        console.log("this is profile page");
+
+        function toggleEditMode() {
+            const viewMode = document.getElementById('viewMode');
+            const editMode = document.getElementById('editMode');
+            const editBtn = document.getElementById('editBtn');
+            
+            if (viewMode.classList.contains('hidden')) {
+                // Switch to view mode
+                viewMode.classList.remove('hidden');
+                editMode.classList.add('hidden');
+                editBtn.textContent = 'Edit Profile';
+                editBtn.classList.remove('bg-gray-600');
+                editBtn.classList.add('bg-blue-600');
+            } else {
+                // Switch to edit mode
+                viewMode.classList.add('hidden');
+                editMode.classList.remove('hidden');
+                editBtn.textContent = 'Cancel Editing';
+                editBtn.classList.remove('bg-blue-600');
+                editBtn.classList.add('bg-gray-600');
+            }
+        }
+
+        function confirmDelete() {
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        document
+        .querySelector("#image")
+        .addEventListener("change", function (event) {
+            let file = event.target.files[0];
+            let reader = new FileReader();
+            reader.onload = function () {
+            document
+                .querySelector("#upload_image_preview")
+                .setAttribute("src", reader.result);
+            };
+            reader.readAsDataURL(file);
+        });
     </script>
 </body>
 </html>

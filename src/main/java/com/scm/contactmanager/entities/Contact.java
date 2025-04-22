@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 @Entity 
 @Table
@@ -41,6 +42,7 @@ public class Contact {
     private String imageUrl;
     @Column(length = 1000)
     private String about;
+    @Default
     private boolean favorite = false;
     private String website;
     private String linkedin;
@@ -55,6 +57,7 @@ public class Contact {
     private User user;
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Default
     private List<SocialLink> socialLinks = new ArrayList<>();
 
     private String cloudinaryImagePublicId;
