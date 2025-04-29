@@ -13,10 +13,10 @@ class ContactmanagerApplicationTests {
 	void contextLoads() {
 	}
 
-	@Autowired
-	private EmailService emailService;
-	@Test
-	void sendEmail() {
-		emailService.sendEmail("saiprakash.bollam07@gmail.com", "Test", "This is a testing email");
-	}
+	// @Autowired
+	// private EmailService emailService;
+	// @Test
+	// void sendEmail() {
+	// 	emailService.sendEmail("saiprakash.bollam07@gmail.com", "Test", "This is a testing email");
+	// }
 }

@@ -1,6 +1,7 @@
 console.log("contacts.js loaded");
 const viewContactModal = document.getElementById("view_contact_modal");
-const baseURL = "http://localhost:8082";
+// const baseURL = "http://localhost:8082";
+const baseURL = "http://conatctmanager.us-east-2.elasticbeanstalk.com";
 
 // options with default values
 const options = {

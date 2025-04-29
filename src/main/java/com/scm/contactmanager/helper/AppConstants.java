@@ -7,7 +7,7 @@ public class AppConstants {
     public static final String ROLE_USER = "ROLE_USER";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
-    public static final String DOMAIN = "http://localhost:8082";
+    public static final String DOMAIN = "http://conatctmanager.us-east-2.elasticbeanstalk.com";
 
     public static final int CONTACT_IMAGE_WIDTH = 500;
     public static final int CONTACT_IMAGE_HEIGHT = 500;
