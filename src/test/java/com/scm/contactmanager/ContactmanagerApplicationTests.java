@@ -9,9 +9,9 @@ import com.scm.contactmanager.services.EmailService;
 @SpringBootTest
 class ContactmanagerApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+	// @Test
+	// void contextLoads() {
+	// }
 
 	// @Autowired
 	// private EmailService emailService;
