@@ -15,11 +15,18 @@ import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.services.EmailService;
 import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.entities.PasswordResetToken;
+import com.scm.contactmanager.services.PasswordResetTokenService;
+import com.scm.contactmanager.forms.ResetPasswordForm;
+import com.scm.contactmanager.helper.UserHelper;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.PostMapping;
+import java.util.Optional;
 
 
 @Controller
@@ -30,6 +37,9 @@ public class PageController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordResetTokenService passwordResetTokenService;
 
     @RequestMapping("/")
     public String index() {
@@ -151,6 +161,66 @@ public class PageController {
 
         emailService.sendFeedbackEmail(feedbackForm.getEmail(), "Contact Manager APP Feedback from: " + feedbackForm.getName(), feedbackForm.getMessage());
         return "contact";
+    }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordPage() {
+        return "forgot_password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam("email") String email, Model model) {
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            model.addAttribute("error", "No account found with that email address.");
+            return "forgot_password";
+        }
+        PasswordResetToken token = passwordResetTokenService.createTokenForUser(user);
+        String resetLink = UserHelper.getLinkForPasswordReset(token.getToken());
+        emailService.sendEmail(user.getEmail(), "Password Reset Request", "Click the link to reset your password: " + resetLink);
+        model.addAttribute("success", "A password reset link has been sent to your email.");
+        return "forgot_password";
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordPage(@RequestParam("token") String token, Model model) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenService.findByToken(token);
+        if (resetTokenOpt.isEmpty() || passwordResetTokenService.isTokenExpired(resetTokenOpt.get())) {
+            model.addAttribute("error", "Invalid or expired password reset token.");
+            model.addAttribute("resetPasswordForm", new ResetPasswordForm());
+            return "reset_password";
+        }
+        model.addAttribute("token", token);
+        model.addAttribute("resetPasswordForm", new ResetPasswordForm());
+        return "reset_password";
+    }
+
+    @PostMapping("/reset-password")
+    public String processResetPassword(@RequestParam("token") String token,
+                                       @Valid @ModelAttribute("resetPasswordForm") ResetPasswordForm form,
+                                       BindingResult bindingResult,
+                                       Model model,
+                                       HttpSession session) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenService.findByToken(token);
+        if (resetTokenOpt.isEmpty() || passwordResetTokenService.isTokenExpired(resetTokenOpt.get())) {
+            model.addAttribute("error", "Invalid or expired password reset token.");
+            model.addAttribute("resetPasswordForm", new ResetPasswordForm());
+            return "reset_password";
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("token", token);
+            // resetPasswordForm is already present due to @ModelAttribute
+            return "reset_password";
+        }
+        User user = resetTokenOpt.get().getUser();
+        userService.updatePassword(user, form.getPassword());
+        passwordResetTokenService.deleteToken(resetTokenOpt.get());
+        emailService.sendEmail(user.getEmail(), "Password Changed", "Your password has been changed successfully.");
+        session.setAttribute("message", Message.builder()
+                .type(MessageType.green)
+                .content("Your password has been reset. You can now log in.")
+                .build());
+        return "redirect:/login";
     }
 
 }
