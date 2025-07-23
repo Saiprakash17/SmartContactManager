@@ -3,12 +3,10 @@ package com.scm.contactmanager.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.services.UserService;
-
 import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
 
@@ -40,4 +38,5 @@ public class AuthController {
             return "redirect:/login";
         }
     }
+
 }

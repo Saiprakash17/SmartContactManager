@@ -41,4 +41,12 @@ public class UserHelper {
         link.append(verifyToken);
         return link.toString();
     }
+
+    public static String getLinkForPasswordReset(String token){
+        StringBuilder link = new StringBuilder();
+        link.append(AppConstants.DOMAIN);
+        link.append("/reset-password?token=");
+        link.append(token);
+        return link.toString();
+    }
 }
