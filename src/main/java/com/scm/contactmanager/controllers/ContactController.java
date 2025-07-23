@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
+import com.scm.contactmanager.entities.Relationship;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.forms.ContactForm;
 import com.scm.contactmanager.forms.ContactsSearchForm;
@@ -96,6 +97,7 @@ public class ContactController {
         contact.setLinkedin(contactForm.getLinkedInLink());
         contact.setWebsite(contactForm.getWebsiteLink());
         contact.setUser(user);
+        contact.setRelationship(contactForm.getRelationship());
 
         // Process image
         // Check if the image is not null and not empty
@@ -168,6 +170,8 @@ public class ContactController {
         } else if (contactSearchForm.getField().equalsIgnoreCase("phone")) {
             contactsPage = contactService.searchByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy,
                     direction, user);
+        } else if (contactSearchForm.getField().equalsIgnoreCase("relationship")) {
+            contactsPage = contactService.searchByRelationship(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
         } else {
             // Default to fetching all contacts if no specific field is selected
             contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
@@ -222,6 +226,7 @@ public class ContactController {
         contactForm.setLinkedInLink(contact.getLinkedin());
         contactForm.setWebsiteLink(contact.getWebsite());
         contactForm.setPicture(contact.getImageUrl());
+        contactForm.setRelationship(contact.getRelationship());
 
         // Add the ContactForm object to the model
         model.addAttribute("contactId", contactIdLong);
@@ -266,6 +271,7 @@ public class ContactController {
         contact.setAbout(contactForm.getDescription());
         contact.setLinkedin(contactForm.getLinkedInLink());
         contact.setWebsite(contactForm.getWebsiteLink());
+        contact.setRelationship(contactForm.getRelationship());
         
 
         // Process image

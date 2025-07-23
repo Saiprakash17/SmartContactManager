@@ -26,9 +26,10 @@
                                         <option value="name">Name</option>
                                         <option value="phone">Phone</option>
                                         <option value="email">Email</option>
+                                        <option value="relationship">Relationship</option>
                                     </select>
                                 </div>
-                                <label for="table-search" class="sr-only">Search</label>
+                                <label for="table-search-users" class="sr-only">Search</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
                                         <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -71,6 +72,9 @@
                                     Favorite
                                 </th>
                                 <th scope="col" class="px-6 py-3">
+                                    Relationship
+                                </th>
+                                <th scope="col" class="px-6 py-3">
                                     Action
                                 </th>
                             </tr>
@@ -107,6 +111,9 @@
                                     <div data-th-if="*{favorite}"  class="items-center">
                                         <i class="fa-solid fa-heart" style="color: #ed3535;"></i>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4" th:text="*{relationship != null} ? *{relationship.label} : '-'">
+                                    -
                                 </td>
                                 <td class="px-6 py-4">
 
@@ -206,7 +213,7 @@
             const headerRow = document.createElement("tr");
 
             // Define custom headers
-            ["Name", "Email", "Phone", "Address", "Links", "About", "Image", "Favorite"].forEach(headerText => {
+            ["Name", "Email", "Phone", "Relationship", "Address", "Links", "About", "Image", "Favorite"].forEach(headerText => {
                 const th = document.createElement("th");
                 th.textContent = headerText;
                 headerRow.appendChild(th);
@@ -221,8 +228,9 @@
                 const name = row.querySelector("td:nth-child(2) div.text-base")?.textContent.trim() || "N/A";
                 const email = row.querySelector("td:nth-child(2) div.font-normal")?.textContent.trim() || "N/A";
                 const phone = row.querySelector("td:nth-child(3) span").textContent.trim();
-                const address = row.querySelector("td:nth-child(7) span")?.textContent.trim() || "N/A";
-                const about = row.querySelector("td:nth-child(8) span")?.textContent.trim() || "N/A";
+                const relationship = row.querySelector("td:nth-child(6)")?.textContent.trim() || "N/A";
+                const address = row.querySelector("td:nth-child(8) span")?.textContent.trim() || "N/A";
+                const about = row.querySelector("td:nth-child(9) span")?.textContent.trim() || "N/A";
                 const links = Array.from(row.querySelectorAll("td:nth-child(4) a"))
                     .map(link => link.href)
                     .join(", ") || "N/A";
@@ -231,7 +239,7 @@
                 const favorite = row.querySelector("td:nth-child(5) i.fa-heart") ? "Yes" : "No";
                 const customRow = document.createElement("tr");
 
-                [name, email, phone, address, links, about, image, favorite].forEach(cellText => {
+                [name, email, phone, relationship, address, links, about, image, favorite].forEach(cellText => {
                     const td = document.createElement("td");
                     td.textContent = cellText;
                     customRow.appendChild(td);

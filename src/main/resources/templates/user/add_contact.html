@@ -33,7 +33,7 @@
                       <!-- name form -->
                       <div class="mb-3">
                         <label
-                          for="input-group-1"
+                          for="contact-name"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Name</label
                         >
@@ -44,6 +44,7 @@
                             <i class="fa-regular w-4 h-4 fa-user"></i>
                           </div>
                           <input
+                            id="contact-name"
                             data-th-field="*{name}"
                             type="text"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -62,7 +63,7 @@
                       <!-- email form -->
                       <div class="mb-3">
                         <label
-                          for="input-group-1"
+                          for="contact-email"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Email</label
                         >
@@ -73,6 +74,7 @@
                             <i class="fa-regular w-4 h-4 fa-envelope"></i>
                           </div>
                           <input
+                            id="contact-email"
                             type="text"
                             data-th-field="*{email}"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -91,7 +93,7 @@
                       <!-- phone number  -->
                       <div class="mb-3">
                         <label
-                          for="input-group-1"
+                          for="contact-phone"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Phone</label
                         >
@@ -102,6 +104,7 @@
                             <i class="fa-solid w-4 h-4 fa-phone"></i>
                           </div>
                           <input
+                            id="contact-phone"
                             data-th-field="*{phoneNumber}"
                             type="text"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -124,8 +127,8 @@
                                 
                                 <!-- Street -->
                                 <div class="mb-3">
-                                    <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Street</label>
-                                    <input th:field="*{street}" type="text" 
+                                    <label for="contact-street" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Street</label>
+                                    <input id="contact-street" th:field="*{street}" type="text" 
                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                            placeholder="123 Main St">
                                     <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('street')}" th:errors="*{street}"></p>
@@ -135,8 +138,8 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                                     <!-- City -->
                                     <div>
-                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">City</label>
-                                        <input th:field="*{city}" type="text" 
+                                        <label for="contact-city" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">City</label>
+                                        <input id="contact-city" th:field="*{city}" type="text" 
                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                                placeholder="New York">
                                         <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></p>
@@ -144,8 +147,8 @@
                                     
                                     <!-- State -->
                                     <div>
-                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">State</label>
-                                        <input th:field="*{state}" type="text" 
+                                        <label for="contact-state" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">State</label>
+                                        <input id="contact-state" th:field="*{state}" type="text" 
                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                                placeholder="NY">
                                         <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('state')}" th:errors="*{state}"></p>
@@ -153,8 +156,8 @@
                                     
                                     <!-- Zip Code -->
                                     <div>
-                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Zip Code</label>
-                                        <input th:field="*{zipCode}" type="text" 
+                                        <label for="contact-zip" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Zip Code</label>
+                                        <input id="contact-zip" th:field="*{zipCode}" type="text" 
                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                                placeholder="10001">
                                         <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('zipCode')}" th:errors="*{zipCode}"></p>
@@ -163,8 +166,8 @@
                                 
                                 <!-- Country -->
                                 <div class="mb-3">
-                                    <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Country</label>
-                                    <select th:field="*{country}" 
+                                    <label for="contact-country" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Country</label>
+                                    <select id="contact-country" th:field="*{country}" 
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <option value="" disabled selected>Select Country</option>
                                         <option value="US">United States</option>
@@ -175,17 +178,34 @@
                                     </select>
                                     <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></p>
                                 </div>
+
+                                <!-- relationship -->
+                                <div class="mb-3">
+                                  <label for="contact-relationship" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Relationship</label>
+                                  <select id="contact-relationship" th:field="*{relationship}"
+                                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option value="" disabled selected>Select Relationship</option>
+                                    <option value="FAMILY">Family</option>
+                                    <option value="FRIEND">Friend</option>
+                                    <option value="RELATIVE">Relative</option>
+                                    <option value="COLLEAGUE">Colleague</option>
+                                    <option value="CLASSMATE">Classmate</option>
+                                    <option value="OTHER">Other</option>
+                                  </select>
+                                  <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('relationship')}" th:errors="*{relationship}"></p>
+                                </div>
                       </div>
       
                       <!-- description -->
       
                       <div class="mb-3">
                         <label
-                          for="message"
+                          for="contact-description"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Description</label
                         >
                         <textarea
+                          id="contact-description"
                           data-th-field="*{description}"
                           rows="4"
                           class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -235,12 +255,12 @@
                       <!-- contact image field -->
                       <div class="mb-3">
                         <label
+                          for="contact-image"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          for="large_size"
                           >Contact Image</label
                         >
                         <input
-                          id="image_file_input"
+                          id="contact-image"
                           class="block w-full mb-2 text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                           data-th-field="*{contactImage}"
                           type="file"
@@ -266,12 +286,13 @@
       
                       <div class="flex items-center mb-3">
                         <input
+                          id="favorite-checkbox"
                           data-th-field="*{favorite}"
                           type="checkbox"
                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                         />
                         <label
-                          for="default-checkbox"
+                          for="favorite-checkbox"
                           class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                           >Is this contact is your favorite one ?</label
                         >
