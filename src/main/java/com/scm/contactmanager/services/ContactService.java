@@ -37,4 +37,6 @@ public interface ContactService {
     Page<Contact> searchByEmail(String keyword, int size, int page, String sortBy, String direction, User user);
 
     Page<Contact> searchByPhoneNumber(String keyword, int size, int page, String sortBy, String direction, User user);
+
+    Page<Contact> searchByRelationship(String keyword, int size, int page, String sortBy, String direction, User user);
 }

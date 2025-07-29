@@ -47,6 +47,9 @@ public class Contact {
     private String website;
     private String linkedin;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    private Relationship relationship;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     //@JsonManagedReference

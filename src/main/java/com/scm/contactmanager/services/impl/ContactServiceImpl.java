@@ -103,4 +103,11 @@ public class ContactServiceImpl implements ContactService {
         var pageable = PageRequest.of(page, size, sort);
         return contactRepo.findByUserAndPhoneNumberContaining(user, phoneNumberKeyword, pageable);
     }
+
+    @Override
+    public Page<Contact> searchByRelationship(String relationshipKeyword, int size, int page, String sortBy, String order, User user) {
+        Sort sort = order.equals("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return contactRepo.findByUserAndRelationshipContainingIgnoreCase(user, relationshipKeyword, pageable);
+    }
 }

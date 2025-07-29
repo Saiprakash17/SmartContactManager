@@ -33,7 +33,7 @@
                       <!-- name form -->
                       <div class="mb-3">
                         <label
-                          for="input-group-1"
+                          for="contact-name"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Name</label
                         >
@@ -62,7 +62,7 @@
                       <!-- email form -->
                       <div class="mb-3">
                         <label
-                          for="input-group-1"
+                          for="contact-email"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Email</label
                         >
@@ -91,7 +91,7 @@
                       <!-- phone number  -->
                       <div class="mb-3">
                         <label
-                          for="input-group-1"
+                          for="contact-phone"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Phone</label
                         >
@@ -124,7 +124,7 @@
                                 
                                 <!-- Street -->
                                 <div class="mb-3">
-                                    <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Street</label>
+                                    <label for="contact-street" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Street</label>
                                     <input th:field="*{street}" type="text" 
                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                            placeholder="123 Main St">
@@ -135,7 +135,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                                     <!-- City -->
                                     <div>
-                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">City</label>
+                                        <label for="contact-city" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">City</label>
                                         <input th:field="*{city}" type="text" 
                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                                placeholder="New York">
@@ -144,7 +144,7 @@
                                     
                                     <!-- State -->
                                     <div>
-                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">State</label>
+                                        <label for="contact-state" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">State</label>
                                         <input th:field="*{state}" type="text" 
                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                                placeholder="NY">
@@ -153,7 +153,7 @@
                                     
                                     <!-- Zip Code -->
                                     <div>
-                                        <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Zip Code</label>
+                                        <label for="contact-zip" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Zip Code</label>
                                         <input th:field="*{zipCode}" type="text" 
                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                                                placeholder="10001">
@@ -163,7 +163,7 @@
                                 
                                 <!-- Country -->
                                 <div class="mb-3">
-                                    <label class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Country</label>
+                                    <label for="contact-country" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Country</label>
                                     <select th:field="*{country}" 
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <option value="" disabled selected>Select Country</option>
@@ -175,13 +175,29 @@
                                     </select>
                                     <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></p>
                                 </div>
+
+                                <!-- relationship -->
+                                <div class="mb-3">
+                                  <label for="contact-relationship" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Relationship</label>
+                                  <select th:field="*{relationship}"
+                                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option value="" disabled selected>Select Relationship</option>
+                                    <option value="FAMILY">Family</option>
+                                    <option value="FRIEND">Friend</option>
+                                    <option value="RELATIVE">Relative</option>
+                                    <option value="COLLEAGUE">Colleague</option>
+                                    <option value="CLASSMATE">Classmate</option>
+                                    <option value="OTHER">Other</option>
+                                  </select>
+                                  <p class="text-red-500 text-sm mt-1" th:if="${#fields.hasErrors('relationship')}" th:errors="*{relationship}"></p>
+                                </div>
                       </div>
       
                       <!-- description -->
       
                       <div class="mb-3">
                         <label
-                          for="message"
+                          for="contact-description"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                           >Contact Description</label
                         >
@@ -235,12 +251,12 @@
                       <!-- contact image field -->
                       <div class="mb-3">
                         <label
+                          for="contact-image"
                           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                          for="large_size"
                           >Contact Image</label
                         >
                         <input
-                          id="image_file_input"
+                          id="contact-image"
                           class="block w-full mb-2 text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                           data-th-field="*{contactImage}"
                           type="file"
@@ -271,7 +287,7 @@
                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                         />
                         <label
-                          for="default-checkbox"
+                          for="favorite-checkbox"
                           class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                           >Is this contact is your favorite one ?</label
                         >

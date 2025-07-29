@@ -30,4 +30,7 @@ public interface ContactRepo extends JpaRepository<Contact, Long> {
 
     Page<Contact> findByUserAndPhoneNumberContaining(User user, String phoneNumberKeyword, PageRequest pageable);
 
+    @Query("SELECT c FROM Contact c WHERE c.user = :user AND LOWER(CAST(c.relationship AS string)) LIKE LOWER(CONCAT('%', :relationship, '%'))")
+    Page<Contact> findByUserAndRelationshipContainingIgnoreCase(@Param("user") User user, @Param("relationship") String relationship, Pageable pageable);
+
 }
