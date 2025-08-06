@@ -17,12 +17,20 @@ public class UserHelper {
 
             if(clientId.equals("google")){
                 System.out.println("Getting email from google");
-                username = oauth2User.getAttribute("email");
+                Object emailAttr = oauth2User.getAttribute("email");
+                username = emailAttr != null ? emailAttr.toString() : "";
             }
             else if(clientId.equals("github")){
                 System.out.println("Getting email from github");
-                username = oauth2User.getAttribute("email") != null ? oauth2User.getAttribute("email").toString()
-                        : oauth2User.getAttribute("login").toString() + "@gmail.com";
+                Object emailAttr = oauth2User.getAttribute("email");
+                Object loginAttr = oauth2User.getAttribute("login");
+                if (emailAttr != null) {
+                    username = emailAttr.toString();
+                } else if (loginAttr != null) {
+                    username = loginAttr.toString() + "@gmail.com";
+                } else {
+                    username = "";
+                }
             }
             return username;
         }

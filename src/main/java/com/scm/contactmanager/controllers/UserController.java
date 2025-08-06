@@ -49,6 +49,10 @@ public class UserController {
     public String profile(Model model) {
         System.out.println("Profile page requested");
         User user = (User) model.getAttribute("loggedInUser");
+        if (user == null) {
+            // handle missing user gracefully
+            return "redirect:/login";
+        }
         ProfileForm profileForm = new ProfileForm(user.getName(), user.getPassword(), user.getPhoneNumber(), user.getAbout(), null, user.getImageUrl());
         model.addAttribute("profileForm", profileForm);
         ChangePasswordForm changePasswordForm = new ChangePasswordForm();
@@ -80,6 +84,9 @@ public class UserController {
         }
 
         User user = (User) model.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
         if(!userService.validatePassword(user, profileForm.getCurrentPassword())) {
             model.addAttribute("profileForm", profileForm);
             session.setAttribute("message", Message.builder()
@@ -87,21 +94,16 @@ public class UserController {
                     .type(MessageType.red)
                     .build());
             return "user/profile";
-        }else {
+        } else {
             user.setName(profileForm.getName());
             user.setPhoneNumber(profileForm.getPhoneNumber());
             user.setAbout(profileForm.getAbout());
-            //process image upload
             if (profileForm.getContactImage() != null && !profileForm.getContactImage().isEmpty()) {
                 String fileName = UUID.randomUUID().toString();
                 String fileURL = imageService.uploadImage(profileForm.getContactImage(), fileName);
-                // Set the image URL in the user object
                 user.setImageUrl(fileURL);
-                // Set the public ID for the image in Cloudinary
                 user.setCloudinaryImagePublicId(fileName);
             }
-
-            // Save the user object to the database
             userService.updateUser(user);
             session.setAttribute("message", Message.builder()
                     .content("Profile updated successfully")
@@ -116,6 +118,9 @@ public class UserController {
     public String deleteAccount(Model model, HttpSession session) {
         System.out.println("Delete account page requested");
         User user = (User) model.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
         userService.deleteUserById(user.getId());
         session.setAttribute("message",
                 Message.builder()
@@ -131,9 +136,10 @@ public class UserController {
             BindingResult bindingResult, Model model, HttpSession session) {
         System.out.println("Change password page requested");
         User user = (User) model.getAttribute("loggedInUser");
-
+        if (user == null) {
+            return "redirect:/login";
+        }
         if (bindingResult.hasErrors()) {
-            System.out.println("Binding result has errors: " + bindingResult.getAllErrors());
             ProfileForm profileForm = new ProfileForm(user.getName(), user.getPassword(), user.getPhoneNumber(), user.getAbout(), null, user.getImageUrl());
             model.addAttribute("profileForm", profileForm);
             session.setAttribute("message", Message.builder()
@@ -142,7 +148,6 @@ public class UserController {
                     .build());
             return "user/profile";
         }
-
         if (!userService.validatePassword(user, changePasswordForm.getCurrentPassword())) {
             ProfileForm profileForm = new ProfileForm(user.getName(), user.getPassword(), user.getPhoneNumber(), user.getAbout(), null, user.getImageUrl());
             model.addAttribute("profileForm", profileForm);

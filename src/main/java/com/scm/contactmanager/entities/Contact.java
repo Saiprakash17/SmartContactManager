@@ -52,7 +52,6 @@ public class Contact {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
-    //@JsonManagedReference
     private Address address;
 
     @ManyToOne

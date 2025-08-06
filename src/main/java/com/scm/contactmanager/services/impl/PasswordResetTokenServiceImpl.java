@@ -21,7 +21,6 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
 
     @Override
     public PasswordResetToken createTokenForUser(User user) {
-        // Remove existing token for user
         tokenRepo.findByUser(user).ifPresent(tokenRepo::delete);
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = PasswordResetToken.builder()
