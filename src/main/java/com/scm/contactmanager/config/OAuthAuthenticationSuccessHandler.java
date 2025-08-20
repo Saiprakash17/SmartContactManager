@@ -56,9 +56,12 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
         if(authrizedClientRegistrationId.equals("google")){
             user.setEmailVerified(true);
-            user.setEmail(oAuthUser.getAttribute("email").toString());
-            user.setImageUrl(oAuthUser.getAttribute("picture").toString());
-            user.setName(oAuthUser.getAttribute("name").toString());
+            Object emailAttr = oAuthUser.getAttribute("email");
+            Object pictureAttr = oAuthUser.getAttribute("picture");
+            Object nameAttr = oAuthUser.getAttribute("name");
+            user.setEmail(emailAttr != null ? emailAttr.toString() : "");
+            user.setImageUrl(pictureAttr != null ? pictureAttr.toString() : "");
+            user.setName(nameAttr != null ? nameAttr.toString() : "");
             user.setProviderUserId(oAuthUser.getName());
             user.setProvider(Providers.GOOGLE);
             user.setAbout("This account is created using google.");
@@ -68,12 +71,18 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
         else if (authrizedClientRegistrationId.equals("github")){
             user.setEmailVerified(true);
-            String email = oAuthUser.getAttribute("email") != null ? oAuthUser.getAttribute("email").toString()
-                    : oAuthUser.getAttribute("login").toString() + "@gmail.com";
-
+            Object emailAttr = oAuthUser.getAttribute("email");
+            Object loginAttr = oAuthUser.getAttribute("login");
+            Object avatarAttr = oAuthUser.getAttribute("avatar_url");
+            String email = "";
+            if (emailAttr != null) {
+                email = emailAttr.toString();
+            } else if (loginAttr != null) {
+                email = loginAttr.toString() + "@gmail.com";
+            }
             user.setEmail(email);
-            user.setImageUrl(oAuthUser.getAttribute("avatar_url").toString());
-            user.setName(oAuthUser.getAttribute("login").toString());
+            user.setImageUrl(avatarAttr != null ? avatarAttr.toString() : "");
+            user.setName(loginAttr != null ? loginAttr.toString() : "");
             user.setProviderUserId(oAuthUser.getName());
             user.setProvider(Providers.GITHUB);
             user.setAbout("This account is created using github.");

@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html lang="en" th:replace="base :: parent(~{::title}, ~{::#content}, ~{::script})">
 <head>
-    <title th:text="${loggedInUser.getName()}+' | Contact Manager'">View Contacts page</title>
+    <title th:text="${loggedInUser.getName()}+' | Favorite Contacts'">Favorite Contacts</title>
 </head>
 <body>
     <div id="content">
-
-        <div class="pt-5">
+        <div class="pt-5" >
             <div class="flex items-center justify-center flex-col">
-                <h1 style="font-size: large;">All Your Contacts</h1>
+                <h1 style="font-size: large;">Your Favorite Contacts</h1>
                 <p th:text="${contactsPage.totalElements} + ' results found'"> </p>
             </div>
-
             <div class="contact_container p-5">
-
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-
                     <div class="flex items-center justify-between px-4 bg-white dark:bg-gray-900">
-                        <form th:object="${contactSearchForm}" th:action="@{'/user/contacts/search'}">
+<form th:object="${contactSearchForm}" th:action="@{'/user/contacts/favorites'}" method="post">
                             <div class="flex p-5 space-x-2 items-center justify-start flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-3 bg-white dark:bg-gray-900">
                                 <div>
-                                    <select th:field="*{field}" id="contacts-search-field" class="py-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <select th:field="*{field}" id="favorite-search-field" class="py-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <option selected value="">Select a field</option>
                                         <option value="name">Name</option>
                                         <option value="phone">Phone</option>
@@ -28,21 +24,25 @@
                                         <option value="relationship">Relationship</option>
                                     </select>
                                 </div>
-                                <label for="table-search-users" class="sr-only">Search</label>
+                                <label for="favorite-table-search-users" class="sr-only">Search</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
                                         <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                                         </svg>
                                     </div>
-                                    <input th:field="*{keyword}" type="text" id="table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
+                                    <input th:field="*{keyword}" type="text" id="favorite-table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for users">
                                 </div>
-                                <button type="submit" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">Search</button>
+                                <button type="submit" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">
+                                    Search
+                                </button>
                                 <div th:replace="message :: message"></div>
                             </div>
                         </form>
                         <div>
-                            <button type="button" onclick="exportData()" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">Export to CSV</button>
+                            <button type="button" onclick="exportData()" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">
+                                Export to CSV
+                            </button>
                         </div>
                     </div>
                     <table class="text-center w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -57,10 +57,9 @@
                                 <th scope="col" class="px-6 py-3">Name</th>
                                 <th scope="col" class="px-6 py-3">Phone Number</th>
                                 <th scope="col" class="px-6 py-3">Link</th>
-                                <th scope="col" class="px-6 py-3">Favorite</th>
                                 <th scope="col" class="px-6 py-3">Relationship</th>
-                                <th scope="col" class="px-6 py-3">Action</th>
                                 <th scope="col" class="px-6 py-3">QR Code</th>
+                                <th scope="col" class="px-6 py-3">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -72,7 +71,7 @@
                                     </div>
                                 </td>
                                 <td scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
-                                    <img onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'" class="w-10 h-10 rounded-full" th:src="@{*{imageUrl}}" alt="Contact image">
+                                    <img onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'" class="w-10 h-10 rounded-full" th:src="@{*{imageUrl}}" alt="Jese image">
                                     <div class="ps-4">
                                         <div class="text-base font-semibold" th:text="*{name}"></div>
                                         <div class="font-normal text-gray-500" th:text="*{email}"></div>
@@ -83,30 +82,37 @@
                                     <span class="text-base font-semibold" th:text="*{phoneNumber}"></span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <a data-th-href="@{*{website}}" target="_blank"><i class="fa-solid w-6 h-6 fa-link"></i></a>
-                                    <a data-th-href="@{*{linkedin}}" target="_blank"><i class="fa-brands w-6 h-6 fa-linkedin"></i></a>
+                                    <a data-th-href="@{*{website}}" target="_blank"
+                                    ><i class="fa-solid w-6 h-6 fa-link"></i
+                                    ></a>
+
+                                    <a data-th-href="@{*{linkedin}}" target="_blank">
+                                    <i class="fa-brands w-6 h-6 fa-linkedin"></i>
+                                    </a>
+                                </td>
+                                <!-- Favorite column hidden on this page -->
+                                <td class="px-6 py-4" th:text="*{relationship != null} ? *{relationship.label} : '-'">
+                                    -
                                 </td>
                                 <td class="px-6 py-4">
-                                    <i class="fa-heart" th:classappend="*{favorite} ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'"></i>
+                                    <button type="button" th:id="'show-qr-btn-' + ${c.id}" th:onclick="'showQRModal(' + ${c.id} + ', \' ' + @{/user/contacts/qrcode/{id}(id=${c.id})} + ' \' )'" class="text-xs text-gray-600 bg-gray-200 rounded px-2 py-1 mr-2 hover:bg-gray-300"><i class="fa-solid fa-qrcode"></i> Show QR</button>
+                                        <button type="button" th:onclick="'downloadQR(' + ${c.id} + ', \' ' + @{/user/contacts/qrcode/{id}(id=${c.id})} + ' \' )'" class="text-xs text-blue-600">Download</button>
+                                        <button type="button" th:onclick="'shareQR(' + ${c.id} + ', \' ' + @{/user/contacts/qrcode/{id}(id=${c.id})} + ' \' )'" class="text-xs text-green-600">Share</button>
                                 </td>
-                                <td class="px-6 py-4" th:text="*{relationship != null} ? *{relationship.label} : '-'">-</td>
                                 <td class="px-6 py-4">
                                     <!-- viewcontact -->
                                     <button class="p-3" th:data-id="${c.id}" onclick="loadContactdata(getAttribute('data-id'))">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
                                     <!-- update contact -->
-                                    <a th:href="@{'/user/contacts/edit/'+*{id}}"><i class="fa-solid w-6 h-6 fa-pen"></i></a>
-                                    <!-- delete contact -->
+                                    <a th:href="@{'/user/contacts/edit/'+*{id}}">
+                                        <i class="fa-solid w-6 h-6 fa-pen"></i>
+                                    </a>
                                     <!-- delete contact -->
                                     <button th:data-id="${c.id}" onclick="deleteContact(getAttribute('data-id'))">
                                         <i class="fa-solid w-6 h-6 fa-trash"></i>
                                     </button>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <button type="button" th:id="'show-qr-btn-' + ${c.id}" th:onclick="'showQRModal(' + ${c.id} + ', \'' + @{/user/contacts/qrcode/{id}(id=${c.id})} + '\')'" class="text-xs text-gray-600 bg-gray-200 rounded px-2 py-1 mr-2 hover:bg-gray-300"><i class="fa-solid fa-qrcode"></i> Show QR</button>
-                                    <button type="button" th:onclick="'downloadQR(' + ${c.id} + ')'" class="text-xs text-blue-600">Download</button>
-                                    <button type="button" th:onclick="'shareQR(' + ${c.id} + ')'" class="text-xs text-green-600">Share</button>
+
                                 </td>
                                 <td style="display: none;">
                                     <span th:text="*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}"></span>
@@ -117,24 +123,51 @@
                             </tr>
                         </tbody>
                     </table>
-                    <div data-th-if="${contactsPage.totalElements>0}" class="pagination_container bg-white dark:bg-gray-800 p-5 text-center">
+
+                    <div
+                        data-th-if="${contactsPage.totalElements>0}"
+                        class="pagination_container bg-white dark:bg-gray-800 p-5 text-center"
+                    >
                         <nav aria-label="Page navigation example">
-                            <ul class="inline-flex -space-x-px text-base h-10">
-                                <li data-th-unless="${contactsPage.first}">
-                                    <a data-th-href="@{'/user/contacts/view?size='+${pageSize}+'&page=' + ${contactsPage.number-1}}" href="#" class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-                                </li>
-                                <li data-th-each="index :  ${#numbers.sequence(0,contactsPage.totalPages-1)}">
-                                    <a data-th-href="@{'/user/contacts/view?size='+${pageSize}+'&page='+${index}}" href="#" data-th-classappend="${index==contactsPage.number? 'bg-blue-50  dark:bg-gray-600' : 'bg-white dark:bg-gray-800'}" class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
-                                        <span data-th-text="${index+1}"></span>
-                                    </a>
-                                </li>
-                                <li data-th-unless="${contactsPage.last}">
-                                    <a data-th-href="@{'/user/contacts/view?size='+${pageSize}+'&page=' + ${contactsPage.number+1}}" href="#" class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-                                </li>
-                            </ul>
+                        <ul class="inline-flex -space-x-px text-base h-10">
+                            <li data-th-unless="${contactsPage.first}">
+                            <a
+                                data-th-href="@{'/user/contacts/favorites?size='+${pageSize}+'&page=' + ${contactsPage.number-1}}"
+                                href="#"
+                                class="flex items-center justify-center px-4 h-10 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                                >Previous</a
+                            >
+                            </li>
+                            <li
+                            data-th-each="index :  ${#numbers.sequence(0,contactsPage.totalPages-1)}"
+                            >
+                            <a
+                                data-th-href="@{'/user/contacts/favorites?size='+${pageSize}+'&page='+${index}}"
+                                href="#"
+                                data-th-classappend="${index==contactsPage.number? 'bg-blue-50  dark:bg-gray-600' : 'bg-white dark:bg-gray-800'}"
+                                class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                            >
+                                <span data-th-text="${index+1}"></span>
+                            </a>
+                            </li>
+
+                            <li data-th-unless="${contactsPage.last}">
+                            <a
+                                data-th-href="@{'/user/contacts/favorites?size='+${pageSize}+'&page=' + ${contactsPage.number+1}}"
+                                href="#"
+                                class="flex items-center justify-center px-4 h-10 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                                >Next</a
+                            >
+                            </li>
+                        </ul>
                         </nav>
                     </div>
-                    <h1 class="text-2xl text-center dark:bg-gray-800 dark:text-white bg-white p-4" data-th-if="${contactsPage.totalElements<=0}">No result found</h1>
+                    <h1
+                        class="text-2xl text-center dark:bg-gray-800 dark:text-white bg-white p-4"
+                        data-th-if="${contactsPage.totalElements<=0}"
+                    >
+                        No favorite contacts found
+                    </h1>
                 </div>
             </div>
             <div data-th-replace="~{ user/contact_modal :: contact}"></div>
@@ -145,6 +178,7 @@
     <script th:src="@{/js/contacts.js}"></script>
     <script>
     // All common functions are now in contacts.js
+    console.log("this is favorite Contacts page");
     </script>
 </body>
 </html>

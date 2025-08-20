@@ -63,11 +63,6 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout=true")
         );
 
-        //OAuth Configuration
-        // httpSecurity.oauth2Login(oauth ->{
-        //     oauth.loginPage("/login");
-        //     //oauth.defaultSuccessUrl("/user/dashboard");
-        // });
 
         httpSecurity.oauth2Login(oauth ->{
             oauth.loginPage("/login");

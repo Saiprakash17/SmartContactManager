@@ -14,10 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
-import com.scm.contactmanager.entities.Relationship;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.forms.ContactForm;
 import com.scm.contactmanager.forms.ContactsSearchForm;
@@ -25,6 +29,7 @@ import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.helper.UserHelper;
+import com.scm.contactmanager.helper.QRCodeGenerator;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.UserService;
@@ -34,8 +39,9 @@ import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("user/contacts")
-public class ContactController {
 
+public class ContactController {
+    // --- Declarations ---
     Logger logger = org.slf4j.LoggerFactory.getLogger(UserController.class);
 
     @Autowired
@@ -47,14 +53,21 @@ public class ContactController {
     @Autowired
     private ImageService imageService;
 
+
+
+
     @RequestMapping("/add")
     public String addContactView(Model model) {
+        // Create a new ContactForm and set default favorite to true
         ContactForm contactForm = new ContactForm();
-
         contactForm.setFavorite(true);
+
+        // Add the form to the model
         model.addAttribute("contactForm", contactForm);
+
         return "user/add_contact";
     }
+
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public String saveContact(@Valid @ModelAttribute ContactForm contactForm,
@@ -70,15 +83,14 @@ public class ContactController {
                     .content("Please correct the following errors")
                     .type(MessageType.red)
                     .build());
-
             return "user/add_contact";
         }
 
-        //get user
+        // Get user
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
 
-        //Form to address
+        // Form to address
         Address address = new Address();
         address.setStreet(contactForm.getStreet());
         address.setCity(contactForm.getCity());
@@ -86,7 +98,7 @@ public class ContactController {
         address.setZipCode(contactForm.getZipCode());
         address.setCountry(contactForm.getCountry());
 
-        //Form to contact
+        // Form to contact
         Contact contact = new Contact();
         contact.setName(contactForm.getName());
         contact.setEmail(contactForm.getEmail());
@@ -100,18 +112,14 @@ public class ContactController {
         contact.setRelationship(contactForm.getRelationship());
 
         // Process image
-        // Check if the image is not null and not empty
         if(contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
-            // Generate a unique file name using UUID
             String fileName = UUID.randomUUID().toString();
             String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
-            // Set the image URL in the contact object
             contact.setImageUrl(fileURL);
-            // Set the public ID for the image in Cloudinary
             contact.setCloudinaryImagePublicId(fileName);
             System.out.println("Image uploaded successfully: " + fileURL);
         }
-        
+
         // Save the contact
         Contact savedContact = contactService.saveContact(contact);
         System.out.println("Contact saved: " + savedContact);
@@ -121,8 +129,10 @@ public class ContactController {
                         .content("You have successfully added a new contact")
                         .type(MessageType.green)
                         .build());
+
         return "redirect:/user/contacts/add";
     }
+
 
     @RequestMapping("/view")
     public String viewContacts(@RequestParam(value = "page", defaultValue = "0") int page,
@@ -130,20 +140,22 @@ public class ContactController {
             @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
             @RequestParam(value = "direction", defaultValue = "asc") String direction,
             Model model, Authentication authentication){
-
-        //get user
+        // Get user
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
 
-        //get all contacts by user id
+        // Get all contacts by user id
         Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
-    
+
+        // Add attributes to the model
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
         model.addAttribute("user", user);
         model.addAttribute("contactSearchForm", new ContactsSearchForm());
+
         return "user/view_contacts";
     }
+
 
     @RequestMapping("/search")
     public String SearchHandler(
@@ -156,20 +168,21 @@ public class ContactController {
         Authentication authentication,
         HttpSession session
     ) {
+        // Log the search field and keyword
         logger.info("field {} keyword {}", contactSearchForm.getField(), contactSearchForm.getKeyword());
 
+        // Get the user
         var user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
 
         Page<Contact> contactsPage = null;
+
+        // Determine which field to search by
         if (contactSearchForm.getField().equalsIgnoreCase("name")) {
-            contactsPage = contactService.searchByName(contactSearchForm.getKeyword(), size, page, sortBy, direction,
-                    user);
+            contactsPage = contactService.searchByName(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
         } else if (contactSearchForm.getField().equalsIgnoreCase("email")) {
-            contactsPage = contactService.searchByEmail(contactSearchForm.getKeyword(), size, page, sortBy, direction,
-                    user);
+            contactsPage = contactService.searchByEmail(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
         } else if (contactSearchForm.getField().equalsIgnoreCase("phone")) {
-            contactsPage = contactService.searchByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy,
-                    direction, user);
+            contactsPage = contactService.searchByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
         } else if (contactSearchForm.getField().equalsIgnoreCase("relationship")) {
             contactsPage = contactService.searchByRelationship(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
         } else {
@@ -182,37 +195,46 @@ public class ContactController {
                             .build());
         }
 
+        // Log the result
         logger.info("contactsPage {}", contactsPage);
 
+        // Add attributes to the model
         model.addAttribute("contactSearchForm", contactSearchForm);
-
         model.addAttribute("contactsPage", contactsPage);
-
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
 
         return "user/view_contacts";
     }
 
+
     @RequestMapping("/delete/{contactId}")
     public String deleteContact(@PathVariable("contactId") String contactId, HttpSession session) {
-        // Delete the contact
+        // Parse the contact ID
         Long contactIdLong = Long.parseLong(contactId);
+
+        // Delete the contact
         contactService.deleteContact(contactIdLong);
+
+        // Set success message
         session.setAttribute("message",
                 Message.builder()
                         .content("Contact deleted successfully")
                         .type(MessageType.green)
                         .build());
+
         return "redirect:/user/contacts/view";
     }
 
+
     @RequestMapping("/edit/{contactId}")
     public String editContact(@PathVariable("contactId") String contactId, Model model) {
-        // Get the contact by ID
+        // Parse the contact ID
         Long contactIdLong = Long.parseLong(contactId);
+
+        // Get the contact by ID
         Contact contact = contactService.getContactById(contactIdLong);
 
-        // Create a ContactForm object and populate it with the contact's data
+        // Create and populate the ContactForm
         ContactForm contactForm = new ContactForm();
         contactForm.setName(contact.getName());
         contactForm.setEmail(contact.getEmail());
@@ -231,8 +253,10 @@ public class ContactController {
         // Add the ContactForm object to the model
         model.addAttribute("contactId", contactIdLong);
         model.addAttribute("contactForm", contactForm);
+
         return "user/edit_contact";
     }
+
 
     @RequestMapping(value = "/update_contact/{contactId}", method = RequestMethod.POST)
     public String updateContact(@PathVariable("contactId") String contactId,
@@ -240,20 +264,17 @@ public class ContactController {
             BindingResult result,
             Authentication authentication,
             HttpSession session) {
-        // Logic to update the contact
-
+        // Validate the form
         if (result.hasErrors()) {
             System.out.println("Errors in form");
-            // Handle the errors
             session.setAttribute("message", Message.builder()
                     .content("Please correct the following errors")
                     .type(MessageType.red)
                     .build());
-
             return "user/edit_contact";
         }
 
-        //Form to address
+        // Prepare address
         Address address = new Address();
         address.setStreet(contactForm.getStreet());
         address.setCity(contactForm.getCity());
@@ -261,7 +282,7 @@ public class ContactController {
         address.setZipCode(contactForm.getZipCode());
         address.setCountry(contactForm.getCountry());
 
-        //Form to contact
+        // Get and update contact
         Contact contact = contactService.getContactById(Long.parseLong(contactId));
         contact.setName(contactForm.getName());
         contact.setEmail(contactForm.getEmail());
@@ -272,34 +293,164 @@ public class ContactController {
         contact.setLinkedin(contactForm.getLinkedInLink());
         contact.setWebsite(contactForm.getWebsiteLink());
         contact.setRelationship(contactForm.getRelationship());
-        
 
-        // Process image
-        // Check if the image is not null and not empty
+        // Process image if provided
         if (contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
-            // Generate a unique file name using UUID
             String fileName = UUID.randomUUID().toString();
             String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
-            // Set the image URL in the contact object
             contact.setImageUrl(fileURL);
-            // Set the public ID for the image in Cloudinary
             contact.setCloudinaryImagePublicId(fileName);
             System.out.println("Image uploaded successfully: " + fileURL);
         }
-        else{
+        else {
             logger.info("Image not uploaded, using existing image");
         }
 
         // Update the contact
         Contact updatedContact = contactService.updateContact(contact);
-
         logger.info("Contact updated: " + updatedContact);
 
+        // Set success message
         session.setAttribute("message",
                 Message.builder()
                         .content("You have successfully updated the contact")
                         .type(MessageType.green)
                         .build());
+
         return "redirect:/user/contacts/view";
+    }
+
+
+
+    // Search favorite contacts
+    @RequestMapping(value = "/favorites", method = RequestMethod.POST)
+    public String searchFavoriteContacts(
+            @ModelAttribute ContactsSearchForm contactSearchForm,
+            @RequestParam(value = "size", defaultValue = AppConstants.PAGE_SIZE + "") int size,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction,
+            Model model,
+            Authentication authentication,
+            HttpSession session
+    ) {
+        // Get the logged-in user's username
+        String username = UserHelper.getEmailOfLoggedInUser(authentication);
+
+        // Fetch the user entity
+        User user = userService.getUserByEmail(username);
+
+        Page<Contact> contactsPage = null;
+
+        // Check if both field and keyword are provided for searching
+        if (contactSearchForm.getField() != null && !contactSearchForm.getField().isEmpty() && contactSearchForm.getKeyword() != null && !contactSearchForm.getKeyword().isEmpty()) {
+
+            // Switch based on the selected field for searching favorite contacts
+            switch (contactSearchForm.getField().toLowerCase()) {
+                case "name":
+                    contactsPage = contactService.searchFavoriteByName(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    break;
+
+                case "email":
+                    contactsPage = contactService.searchFavoriteByEmail(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    break;
+
+                case "phone":
+                    contactsPage = contactService.searchFavoriteByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    break;
+
+                case "relationship":
+                    contactsPage = contactService.searchFavoriteByRelationship(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    break;
+
+                default:
+                    contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
+                    session.setAttribute("message",
+                            Message.builder()
+                                    .content("Please select a valid field to search")
+                                    .type(MessageType.red)
+                                    .build());
+            }
+
+        } else {
+
+            // If no field or keyword, return all favorite contacts and show a message
+            contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
+            session.setAttribute("message",
+                    Message.builder()
+                            .content("Please select a field and enter a keyword to search")
+                            .type(MessageType.red)
+                            .build());
+        }
+
+        // Add attributes to the model for rendering in the view
+        model.addAttribute("contactSearchForm", contactSearchForm);
+        model.addAttribute("contactsPage", contactsPage);
+        model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
+        model.addAttribute("user", user);
+        model.addAttribute("favoriteView", true);
+
+        return "user/view_favorite_contacts";
+    }
+
+    // View favorite contacts page
+    @RequestMapping("/favorites")
+    public String viewFavoriteContacts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                       @RequestParam(value = "size", defaultValue = AppConstants.PAGE_SIZE + "") int size,
+                                       @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+                                       @RequestParam(value = "direction", defaultValue = "asc") String direction,
+                                       Model model, Authentication authentication) {
+        String username = UserHelper.getEmailOfLoggedInUser(authentication);
+        User user = userService.getUserByEmail(username);
+        Page<Contact> contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
+        model.addAttribute("contactsPage", contactsPage);
+        model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
+        model.addAttribute("user", user);
+        model.addAttribute("favoriteView", true);
+        model.addAttribute("contactSearchForm", new ContactsSearchForm());
+        return "user/view_favorite_contacts";
+    }
+
+    /**
+     * Endpoint to generate and serve QR code image for a contact
+     */
+    @GetMapping(value = "/qrcode/{contactId}", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public ResponseEntity<byte[]> getContactQRCode(@PathVariable("contactId") Long contactId) {
+        Contact contact = contactService.getContactById(contactId);
+        if (contact == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Prepare contact details as a string (vCard or simple text)
+
+        try {
+            byte[] qrImage = QRCodeGenerator.generateQRCodeFromContact(contact, 250, 250);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(qrImage);
+        } catch (Exception e) {
+            logger.error("Error generating QR code", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Endpoint to decode uploaded QR code image and return contact JSON
+     */
+    @RequestMapping(value = "/decode-qr", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<String> decodeContactQR(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            byte[] imageBytes = file.getBytes();
+            String contactJson = com.scm.contactmanager.helper.QRCodeGenerator.decodeQRCodeImage(imageBytes);
+            // Validate JSON
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            try {
+                Object jsonObj = mapper.readTree(contactJson);
+                return ResponseEntity.ok(mapper.writeValueAsString(jsonObj));
+            } catch (Exception jsonEx) {
+                return ResponseEntity.badRequest().body("{\"error\":\"QR code does not contain valid contact data." + contactJson.replaceAll("\"", "'") + "\"}");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\":\"Could not decode QR code." + e.getMessage().replaceAll("\"", "'") + "\"}");
+        }
     }
 }

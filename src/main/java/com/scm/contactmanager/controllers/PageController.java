@@ -105,7 +105,6 @@ public class PageController {
 
         // Setting the attributes for the about page
         UserForm userForm = new UserForm();
-        //userForm.setName("Sai Prakash");
         model.addAttribute("userForm", userForm);
         return "register";
     }

@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface AddressRepo extends JpaRepository<Address, Long> {
 
     Address findByContactId(Long contactId);
-    // Custom query methods can be defined here if needed
 
 }
