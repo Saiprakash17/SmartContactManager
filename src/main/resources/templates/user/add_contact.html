@@ -30,6 +30,14 @@
                       method="post"
                       enctype="multipart/form-data"
                     >
+                      <!-- QR Code Section: minimal and integrated -->
+                      <div class="flex items-center space-x-3 mb-6 border-b border-gray-200 dark:border-gray-700 pb-3">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Fill via QR</span>
+                        <button type="button" id="scan-qr-btn" class="px-3 py-1 w-32 text-white bg-green-700 hover:bg-green-800 focus:ring-2 focus:outline-none focus:ring-green-300 font-medium rounded text-xs dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Scan</button>
+                        <input type="file" id="qr-upload" accept="image/*" class="hidden" />
+                        <button type="button" id="upload-qr-btn" class="px-3 py-1 w-32 text-white bg-green-700 hover:bg-green-800 focus:ring-2 focus:outline-none focus:ring-green-300 font-medium rounded text-xs dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Upload QR</button>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">Scan or upload QR to auto-fill</span>
+                      </div>
                       <!-- name form -->
                       <div class="mb-3">
                         <label
@@ -280,7 +288,6 @@
                           id="upload_image_preview"
                           alt=""
                         />
-                      </div>
       
                       <!-- favorite checkbox -->
       
@@ -323,7 +330,81 @@
     </div>
 
     <script th:src="@{'/js/user.js'}"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
+      document.getElementById('upload-qr-btn').addEventListener('click', function() {
+        document.getElementById('qr-upload').click();
+      });
+      document.getElementById('qr-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        fetch('/user/contacts/decode-qr', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          if (typeof data === 'object' && data !== null && Object.prototype.hasOwnProperty.call(data, 'error')) {
+            console.log(data.error);
+            alert(data.error);
+          } else {
+            fillContactForm(data);
+          }
+        })
+        .catch((err) => {
+          console.error('QR decode fetch error:', err);
+          alert('Could not decode QR code.');
+        });
+      });
+      document.getElementById('scan-qr-btn').addEventListener('click', function() {
+        document.getElementById('qr-modal').style.display = 'flex';
+        const qrReader = new Html5Qrcode("qr-reader");
+        qrReader.start({ facingMode: "environment" }, {
+          fps: 10,
+          qrbox: 250
+        }, qrCodeMessage => {
+          try {
+            fillContactForm(JSON.parse(qrCodeMessage));
+            alert('QR code scanned and form filled!');
+            qrReader.stop();
+            document.getElementById('qr-modal').style.display = 'none';
+          } catch (e) {
+            alert('Invalid QR code data.');
+          }
+        }, errorMsg => {})
+        .catch(() => alert('Camera error.'));
+        document.getElementById('close-qr-modal').onclick = function() {
+          qrReader.stop();
+          document.getElementById('qr-modal').style.display = 'none';
+        };
+      });
+      function fillContactForm(data) {
+        if (typeof data === 'string') data = JSON.parse(data);
+        const setValue = (id, value) => {
+          const el = document.getElementById(id);
+          if (el) el.value = value || '';
+        };
+        setValue('contact-name', data.name);
+        setValue('contact-email', data.email);
+        setValue('contact-phone', data.phoneNumber);
+        setValue('contact-description', data.about);
+        setValue('contact-street', data.address?.street);
+        setValue('contact-city', data.address?.city);
+        setValue('contact-state', data.address?.state);
+        setValue('contact-zip', data.address?.zipCode);
+        setValue('contact-country', data.address?.country);
+        setValue('contact-relationship', data.relationship);
+        const websiteEl = document.querySelector('[data-th-field="*{websiteLink}"]');
+        if (websiteEl) websiteEl.value = data.website || '';
+        const linkedinEl = document.querySelector('[data-th-field="*{linkedInLink}"]');
+        if (linkedinEl) linkedinEl.value = data.linkedin || '';
+        const favEl = document.getElementById('favorite-checkbox');
+        if (favEl) favEl.checked = !!data.favorite;
+        console.log("Contact form filled with data:", data);
+      }
       console.log("this is add contact page");
     </script>
 </body>

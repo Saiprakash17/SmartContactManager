@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
@@ -24,6 +29,7 @@ import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.helper.UserHelper;
+import com.scm.contactmanager.helper.QRCodeGenerator;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.UserService;
@@ -403,5 +409,48 @@ public class ContactController {
         model.addAttribute("favoriteView", true);
         model.addAttribute("contactSearchForm", new ContactsSearchForm());
         return "user/view_favorite_contacts";
+    }
+
+    /**
+     * Endpoint to generate and serve QR code image for a contact
+     */
+    @GetMapping(value = "/qrcode/{contactId}", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public ResponseEntity<byte[]> getContactQRCode(@PathVariable("contactId") Long contactId) {
+        Contact contact = contactService.getContactById(contactId);
+        if (contact == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Prepare contact details as a string (vCard or simple text)
+
+        try {
+            byte[] qrImage = QRCodeGenerator.generateQRCodeFromContact(contact, 250, 250);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(qrImage);
+        } catch (Exception e) {
+            logger.error("Error generating QR code", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Endpoint to decode uploaded QR code image and return contact JSON
+     */
+    @RequestMapping(value = "/decode-qr", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<String> decodeContactQR(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            byte[] imageBytes = file.getBytes();
+            String contactJson = com.scm.contactmanager.helper.QRCodeGenerator.decodeQRCodeImage(imageBytes);
+            // Validate JSON
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            try {
+                Object jsonObj = mapper.readTree(contactJson);
+                return ResponseEntity.ok(mapper.writeValueAsString(jsonObj));
+            } catch (Exception jsonEx) {
+                return ResponseEntity.badRequest().body("{\"error\":\"QR code does not contain valid contact data." + contactJson.replaceAll("\"", "'") + "\"}");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"error\":\"Could not decode QR code." + e.getMessage().replaceAll("\"", "'") + "\"}");
+        }
     }
 }

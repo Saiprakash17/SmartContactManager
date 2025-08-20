@@ -36,6 +36,7 @@ public class ContactForm {
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits")
     private String phoneNumber;
 
+    // Address fields
     @NotBlank(message = "Street address cannot be empty")
     @Size(max = 100, message = "Street address too long")
     private String street;
@@ -70,6 +71,7 @@ public class ContactForm {
     @ValidFile(message = "Invalid file", checkEmpty = false)
     private MultipartFile contactImage;
 
+    // This field will be populated after image upload
     private String picture;
 
     private Relationship relationship;

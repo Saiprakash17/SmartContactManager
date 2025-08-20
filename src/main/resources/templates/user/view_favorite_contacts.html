@@ -58,6 +58,7 @@
                                 <th scope="col" class="px-6 py-3">Phone Number</th>
                                 <th scope="col" class="px-6 py-3">Link</th>
                                 <th scope="col" class="px-6 py-3">Relationship</th>
+                                <th scope="col" class="px-6 py-3">QR Code</th>
                                 <th scope="col" class="px-6 py-3">Action</th>
                             </tr>
                         </thead>
@@ -94,17 +95,19 @@
                                     -
                                 </td>
                                 <td class="px-6 py-4">
-
+                                    <button type="button" th:id="'show-qr-btn-' + ${c.id}" th:onclick="'showQRModal(' + ${c.id} + ', \' ' + @{/user/contacts/qrcode/{id}(id=${c.id})} + ' \' )'" class="text-xs text-gray-600 bg-gray-200 rounded px-2 py-1 mr-2 hover:bg-gray-300"><i class="fa-solid fa-qrcode"></i> Show QR</button>
+                                        <button type="button" th:onclick="'downloadQR(' + ${c.id} + ', \' ' + @{/user/contacts/qrcode/{id}(id=${c.id})} + ' \' )'" class="text-xs text-blue-600">Download</button>
+                                        <button type="button" th:onclick="'shareQR(' + ${c.id} + ', \' ' + @{/user/contacts/qrcode/{id}(id=${c.id})} + ' \' )'" class="text-xs text-green-600">Share</button>
+                                </td>
+                                <td class="px-6 py-4">
                                     <!-- viewcontact -->
                                     <button class="p-3" th:data-id="${c.id}" onclick="loadContactdata(getAttribute('data-id'))">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-
                                     <!-- update contact -->
                                     <a th:href="@{'/user/contacts/edit/'+*{id}}">
                                         <i class="fa-solid w-6 h-6 fa-pen"></i>
                                     </a>
-
                                     <!-- delete contact -->
                                     <button th:data-id="${c.id}" onclick="deleteContact(getAttribute('data-id'))">
                                         <i class="fa-solid w-6 h-6 fa-trash"></i>
@@ -174,71 +177,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@linways/table-to-excel@1.0.4/dist/tableToExcel.min.js"></script>
     <script th:src="@{/js/contacts.js}"></script>
     <script>
-        console.log("this is favorite Contacts page");
-        function exportData() {
-            // Same export logic as view_contacts.html
-            const table = document.querySelector("table");
-            const checkboxes = table.querySelectorAll("tbody input[type='checkbox']:checked");
-            const rows = Array.from(checkboxes).map(checkbox => checkbox.closest("tr"));
-
-            if (rows.length === 0) {
-                alert("No rows selected for export.");
-                return;
-            }
-
-            const customTable = document.createElement("table");
-            const thead = document.createElement("thead");
-            const headerRow = document.createElement("tr");
-
-            // Define custom headers (no Favorite column)
-            ["Name", "Email", "Phone", "Relationship", "Address", "Links", "About", "Image"].forEach(headerText => {
-                const th = document.createElement("th");
-                th.textContent = headerText;
-                headerRow.appendChild(th);
-            });
-
-            thead.appendChild(headerRow);
-            customTable.appendChild(thead);
-
-            const tbody = document.createElement("tbody");
-
-            rows.forEach(row => {
-                const name = row.querySelector("td:nth-child(2) div.text-base")?.textContent.trim() || "N/A";
-                const email = row.querySelector("td:nth-child(2) div.font-normal")?.textContent.trim() || "N/A";
-                const phone = row.querySelector("td:nth-child(3) span").textContent.trim();
-                const relationship = row.querySelector("td:nth-child(6)")?.textContent.trim() || "N/A";
-                const address = row.querySelector("td:nth-child(8) span")?.textContent.trim() || "N/A";
-                const about = row.querySelector("td:nth-child(9) span")?.textContent.trim() || "N/A";
-                const links = Array.from(row.querySelectorAll("td:nth-child(4) a"))
-                    .map(link => link.href)
-                    .join(", ") || "N/A";
-                const imageUrl = row.querySelector("td:nth-child(2) img").src;
-                const image = imageUrl.includes("cloudinary") ? imageUrl : "N/A";
-                const customRow = document.createElement("tr");
-                [name, email, phone, relationship, address, links, about, image].forEach(cellText => {
-                    const td = document.createElement("td");
-                    td.textContent = cellText;
-                    customRow.appendChild(td);
-                });
-
-                tbody.appendChild(customRow);
-            });
-
-            customTable.appendChild(tbody);
-
-            TableToExcel.convert(customTable, {
-                name: "Selected_Favorite_Contacts.xlsx",
-                sheet: {
-                    name: "Favorite Contacts"
-                }
-            });
-        }
-        function selectall() {
-            const checkboxes = document.querySelectorAll("input[type='checkbox']");
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = !checkbox.checked;
-            });
-        }
+    // All common functions are now in contacts.js
+    console.log("this is favorite Contacts page");
     </script>
 </body>
 </html>
