@@ -109,7 +109,7 @@
                                     <button type="button" th:onclick="'shareQR(' + ${c.id} + ')'" class="text-xs text-green-600">Share</button>
                                 </td>
                                 <td style="display: none;">
-                                    <span th:text="*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}"></span>
+                                    <span th:text="${c.address != null} ? (*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}) : '-'"></span>
                                 </td>
                                 <td style="display: none;">
                                     <span th:text="*{about}"></span>
