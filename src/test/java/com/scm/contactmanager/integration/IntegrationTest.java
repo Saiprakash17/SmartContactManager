@@ -1,0 +1,137 @@
+package com.scm.contactmanager.integration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.scm.contactmanager.entities.Contact;
+import com.scm.contactmanager.entities.User;
+import com.scm.contactmanager.services.ContactService;
+import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.services.QRCodeGeneratorService;
+import com.scm.contactmanager.config.TestConfig;
+
+@SpringBootTest(classes = {com.scm.contactmanager.ContactmanagerApplication.class, TestConfig.class})
+@Transactional
+class IntegrationTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private ContactService contactService;
+
+    @Autowired
+    private QRCodeGeneratorService qrCodeService;
+
+
+
+    @Test
+    @Sql("/test-data.sql")
+    void shouldPerformEndToEndContactOperations() {
+        // Create user
+        User user = new User();
+        user.setName("Test User");
+        user.setEmail("test@example.com");
+        user.setPassword("password123");
+        User savedUser = userService.saveUser(user);
+
+        // Create contact
+        Contact contact = new Contact();
+        contact.setName("Test Contact");
+        contact.setEmail("contact@example.com");
+        contact.setPhoneNumber("1234567890");
+        contact.setUser(savedUser);
+        Contact savedContact = contactService.saveContact(contact);
+
+        // Generate QR code
+        try {
+            byte[] qrCode = qrCodeService.generateQRCodeFromContact(savedContact, 250, 250);
+            assertNotNull(qrCode);
+        } catch (Exception e) {
+            fail("QR code generation failed: " + e.getMessage());
+        }
+
+        // Update contact
+        savedContact.setName("Updated Contact");
+        Contact updatedContact = contactService.updateContact(savedContact);
+        assertEquals("Updated Contact", updatedContact.getName());
+
+        // Search contact
+        assertTrue(contactService.searchByName("Updated", 10, 0, "name", "asc", savedUser)
+                .getContent().contains(updatedContact));
+
+        // Delete contact
+        contactService.deleteContact(updatedContact.getId());
+        assertTrue(contactService.getByUser(savedUser, 0, 10, "name", "asc").isEmpty());
+    }
+
+    @Test
+    void shouldHandleConcurrentOperations() throws InterruptedException {
+        User user = new User();
+        user.setName("Concurrent Test User");
+        user.setEmail("concurrent@example.com");
+        user.setPassword("password123");
+        User savedUser = userService.saveUser(user);
+
+        // Create multiple contacts concurrently
+        Thread thread1 = new Thread(() -> {
+            for (int i = 0; i < 10; i++) {
+                Contact contact = new Contact();
+                contact.setName("Contact " + i);
+                contact.setEmail("contact" + i + "@example.com");
+                contact.setUser(savedUser);
+                contactService.saveContact(contact);
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            for (int i = 10; i < 20; i++) {
+                Contact contact = new Contact();
+                contact.setName("Contact " + i);
+                contact.setEmail("contact" + i + "@example.com");
+                contact.setUser(savedUser);
+                contactService.saveContact(contact);
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+        thread1.join();
+        thread2.join();
+
+        assertEquals(20, contactService.getByUser(savedUser, 0, 100, "name", "asc").getTotalElements());
+    }
+
+    @Test
+    void shouldHandleLargeDataSet() {
+        User user = new User();
+        user.setName("Large Data Test User");
+        user.setEmail("large@example.com");
+        user.setPassword("password123");
+        User savedUser = userService.saveUser(user);
+
+        // Create 1000 contacts
+        for (int i = 0; i < 1000; i++) {
+            Contact contact = new Contact();
+            contact.setName("Contact " + i);
+            contact.setEmail("contact" + i + "@example.com");
+            contact.setUser(savedUser);
+            contactService.saveContact(contact);
+        }
+
+        // Test pagination
+        assertEquals(50, contactService.getByUser(savedUser, 0, 50, "name", "asc").getSize());
+        assertEquals(1000, contactService.getByUser(savedUser, 0, 1000, "name", "asc").getTotalElements());
+
+        // Test search performance
+        long startTime = System.currentTimeMillis();
+        contactService.searchByName("Contact", 10, 0, "name", "asc", savedUser);
+        long endTime = System.currentTimeMillis();
+        assertTrue((endTime - startTime) < 1000); // Search should complete within 1 second
+    }
+}

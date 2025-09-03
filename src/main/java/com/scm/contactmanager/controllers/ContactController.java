@@ -29,12 +29,13 @@ import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.helper.UserHelper;
-import com.scm.contactmanager.helper.QRCodeGenerator;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
+import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
+import com.scm.contactmanager.helper.ResourseNotFoundException;
 import jakarta.validation.Valid;
 
 @Controller
@@ -73,65 +74,77 @@ public class ContactController {
     public String saveContact(@Valid @ModelAttribute ContactForm contactForm,
             BindingResult result,
             Authentication authentication,
-            HttpSession session) {
-        // Logic to save the contact
+            HttpSession session,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
 
-        if (result.hasErrors()) {
-            System.out.println("Errors in form");
-            // Handle the errors
-            session.setAttribute("message", Message.builder()
-                    .content("Please correct the following errors")
-                    .type(MessageType.red)
-                    .build());
-            return "user/add_contact";
+        if (!result.hasErrors()) {
+            try {
+                // Get user
+                String username = UserHelper.getEmailOfLoggedInUser(authentication);
+                User user = userService.getUserByEmail(username);
+
+                // Form to address
+                Address address = new Address();
+                address.setStreet(contactForm.getStreet());
+                address.setCity(contactForm.getCity());
+                address.setState(contactForm.getState());
+                address.setZipCode(contactForm.getZipCode());
+                address.setCountry(contactForm.getCountry());
+
+                // Form to contact
+                Contact contact = new Contact();
+                contact.setName(contactForm.getName());
+                contact.setEmail(contactForm.getEmail());
+                contact.setPhoneNumber(contactForm.getPhoneNumber());
+                contact.setFavorite(contactForm.isFavorite());
+                contact.setAddress(address);
+                contact.setAbout(contactForm.getDescription());
+                contact.setLinkedin(contactForm.getLinkedInLink());
+                contact.setWebsite(contactForm.getWebsiteLink());
+                contact.setUser(user);
+                contact.setRelationship(contactForm.getRelationship());
+
+                // Process image
+                if(contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
+                    String fileName = UUID.randomUUID().toString();
+                    String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
+                    contact.setImageUrl(fileURL);
+                    contact.setCloudinaryImagePublicId(fileName);
+                    System.out.println("Image uploaded successfully: " + fileURL);
+                }
+
+                // Save the contact
+                Contact savedContact = contactService.saveContact(contact);
+                System.out.println("Contact saved: " + savedContact);
+
+                redirectAttributes.addFlashAttribute("message",
+                        Message.builder()
+                                .content("You have successfully added a new contact")
+                                .type(MessageType.green)
+                                .build());
+
+                return "redirect:/user/contacts/view";
+            } catch (Exception e) {
+                logger.error("Error saving contact", e);
+                // Handle any errors during save
+                redirectAttributes.addFlashAttribute("message",
+                        Message.builder()
+                                .content("Error saving contact: " + e.getMessage())
+                                .type(MessageType.red)
+                                .build());
+            }
         }
 
-        // Get user
-        String username = UserHelper.getEmailOfLoggedInUser(authentication);
-        User user = userService.getUserByEmail(username);
-
-        // Form to address
-        Address address = new Address();
-        address.setStreet(contactForm.getStreet());
-        address.setCity(contactForm.getCity());
-        address.setState(contactForm.getState());
-        address.setZipCode(contactForm.getZipCode());
-        address.setCountry(contactForm.getCountry());
-
-        // Form to contact
-        Contact contact = new Contact();
-        contact.setName(contactForm.getName());
-        contact.setEmail(contactForm.getEmail());
-        contact.setPhoneNumber(contactForm.getPhoneNumber());
-        contact.setFavorite(contactForm.isFavorite());
-        contact.setAddress(address);
-        contact.setAbout(contactForm.getDescription());
-        contact.setLinkedin(contactForm.getLinkedInLink());
-        contact.setWebsite(contactForm.getWebsiteLink());
-        contact.setUser(user);
-        contact.setRelationship(contactForm.getRelationship());
-
-        // Process image
-        if(contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
-            String fileName = UUID.randomUUID().toString();
-            String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
-            contact.setImageUrl(fileURL);
-            contact.setCloudinaryImagePublicId(fileName);
-            System.out.println("Image uploaded successfully: " + fileURL);
-        }
-
-        // Save the contact
-        Contact savedContact = contactService.saveContact(contact);
-        System.out.println("Contact saved: " + savedContact);
-
-        session.setAttribute("message",
-                Message.builder()
-                        .content("You have successfully added a new contact")
-                        .type(MessageType.green)
-                        .build());
-
+        // If we get here, either there were validation errors or an exception occurred
+        redirectAttributes.addFlashAttribute("message", Message.builder()
+                .content("Please correct the errors and try again")
+                .type(MessageType.red)
+                .build());
+        redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.contactForm", result);
+        redirectAttributes.addFlashAttribute("contactForm", contactForm);
         return "redirect:/user/contacts/add";
     }
+    
 
 
     @RequestMapping("/view")
@@ -414,21 +427,42 @@ public class ContactController {
     /**
      * Endpoint to generate and serve QR code image for a contact
      */
+    @Autowired
+    private QRCodeGeneratorService qrCodeGeneratorService;
+
     @GetMapping(value = "/qrcode/{contactId}", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
-    public ResponseEntity<byte[]> getContactQRCode(@PathVariable("contactId") Long contactId) {
-        Contact contact = contactService.getContactById(contactId);
-        if (contact == null) {
-            return ResponseEntity.notFound().build();
-        }
-        // Prepare contact details as a string (vCard or simple text)
-
+    public ResponseEntity<byte[]> getContactQRCode(
+            @PathVariable("contactId") Long contactId,
+            @RequestParam(value = "width", defaultValue = "250") int width,
+            @RequestParam(value = "height", defaultValue = "250") int height,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         try {
-            byte[] qrImage = QRCodeGenerator.generateQRCodeFromContact(contact, 250, 250);
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(qrImage);
+            // Validate size parameters
+            if (width <= 0 || height <= 0) {
+                return ResponseEntity.badRequest()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"message\":\"Width and height must be positive integers\"}"
+                        .getBytes());
+            }
+            Contact contact = contactService.getContactById(contactId);
+            // Generate QR code with custom dimensions
+            byte[] qrImage = qrCodeGeneratorService.generateQRCodeFromContact(contact, width, height);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(qrImage);
+        } catch (ResourseNotFoundException e) {
+            return ResponseEntity.status(404)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"message\":\"Contact not found\"}"
+                    .getBytes());
         } catch (Exception e) {
             logger.error("Error generating QR code", e);
-            return ResponseEntity.internalServerError().build();
+            redirectAttributes.addFlashAttribute("message", Message.builder()
+                    .content("Error generating QR code")
+                    .type(MessageType.red)
+                    .build());
+            return ResponseEntity.status(500).build();
         }
     }
 
@@ -437,7 +471,13 @@ public class ContactController {
      */
     @RequestMapping(value = "/decode-qr", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<String> decodeContactQR(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+    public ResponseEntity<String> decodeContactQR(@RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":\"No QR code file provided\"}");
+        }
+
         try {
             byte[] imageBytes = file.getBytes();
             String contactJson = com.scm.contactmanager.helper.QRCodeGenerator.decodeQRCodeImage(imageBytes);

@@ -10,7 +10,10 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.scm.contactmanager.helper.AppConstants;
+import com.scm.contactmanager.helper.QRCodeGenerator;
 import com.scm.contactmanager.services.ImageService;
+import com.scm.contactmanager.entities.Contact;
+import com.google.zxing.WriterException;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -40,7 +43,6 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public String getUrlFromPublicId(String publicId) {
-
         return cloudinary
                 .url()
                 .transformation(
@@ -49,7 +51,15 @@ public class ImageServiceImpl implements ImageService {
                                 .height(AppConstants.CONTACT_IMAGE_HEIGHT)
                                 .crop(AppConstants.CONTACT_IMAGE_CROP))
                 .generate(publicId);
-
+    }
+    
+    @Override
+    public byte[] generateQRCode(Contact contact) {
+        try {
+            return QRCodeGenerator.generateQRCodeFromContact(contact, 250, 250);
+        } catch (WriterException | IOException e) {
+            throw new RuntimeException("Failed to generate QR code", e);
+        }
     }
 }
 

@@ -115,7 +115,7 @@
 
                                 </td>
                                 <td style="display: none;">
-                                    <span th:text="*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}"></span>
+                                    <span th:text="${c.address != null} ? (*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}) : '-'"></span>
                                 </td>
                                 <td style="display: none;">
                                     <span th:text="*{about}"></span>

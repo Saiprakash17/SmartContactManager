@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.scm.contactmanager.services.EmailService;
 
 @Service
-public class EamilServiceImpl implements EmailService {
+public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private JavaMailSender eMailSender;
