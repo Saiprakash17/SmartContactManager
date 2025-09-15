@@ -33,7 +33,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.scm.contactmanager.config.TestConfig;
-import com.scm.contactmanager.config.TestSecurityConfig;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.services.ContactService;
@@ -42,7 +41,7 @@ import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
 
 @WebMvcTest(ContactController.class)
-@Import({TestConfig.class, TestSecurityConfig.class})
+@Import(TestConfig.class)
 public class ContactControllerTest {
 
     @Autowired
