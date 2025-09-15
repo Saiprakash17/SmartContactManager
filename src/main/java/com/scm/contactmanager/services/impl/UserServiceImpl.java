@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.helper.AppConstants;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 import com.scm.contactmanager.helper.UserHelper;
 import com.scm.contactmanager.repositories.UserRepo;
 import com.scm.contactmanager.services.EmailService;
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> updateUser(User user) {
-        User newUser = userRepo.findById(user.getId()).orElseThrow(() -> new ResourseNotFoundException("User not found"));
+        User newUser = userRepo.findById(user.getId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         newUser.setName(user.getName());   
         newUser.setEmail(user.getEmail());
         newUser.setPassword(user.getPassword());
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserById(String id) {
-        User newUser = userRepo.findById(id).orElseThrow(() -> new ResourseNotFoundException("User not found"));
+        User newUser = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         userRepo.delete(newUser);
     }
 
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByEmail(String email) {
         return userRepo.findByEmail(email)
-            .orElseThrow(() -> new ResourseNotFoundException("User not found with email: " + email));
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.scm.contactmanager.forms.ContactsSearchForm;
 import com.scm.contactmanager.helper.AppConstants;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 import com.scm.contactmanager.helper.UserHelper;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
@@ -35,7 +36,6 @@ import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
 
 import jakarta.servlet.http.HttpSession;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
 import jakarta.validation.Valid;
 
 @Controller
@@ -451,7 +451,7 @@ public class ContactController {
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_PNG)
                     .body(qrImage);
-        } catch (ResourseNotFoundException e) {
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(404)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body("{\"message\":\"Contact not found\"}"

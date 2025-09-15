@@ -22,7 +22,7 @@ import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.repositories.ContactRepo;
 import com.scm.contactmanager.services.impl.ContactServiceImpl;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class ContactServiceTest {
@@ -77,7 +77,7 @@ public class ContactServiceTest {
     void shouldThrowExceptionWhenContactNotFound() {
         when(contactRepo.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(ResourseNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             contactService.getContactById(999L);
         });
     }

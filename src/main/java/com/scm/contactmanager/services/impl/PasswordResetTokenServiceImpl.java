@@ -38,6 +38,15 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
     }
 
     @Override
+    public Optional<PasswordResetToken> findValidTokenForUser(User user) {
+        Optional<PasswordResetToken> tokenOpt = tokenRepo.findByUser(user);
+        if (tokenOpt.isPresent() && !isTokenExpired(tokenOpt.get())) {
+            return tokenOpt;
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public boolean isTokenExpired(PasswordResetToken token) {
         return token.getExpiryDate().isBefore(LocalDateTime.now());
     }

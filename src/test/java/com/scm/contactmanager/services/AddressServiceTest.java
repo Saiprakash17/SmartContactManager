@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.repositories.AddressRepo;
 import com.scm.contactmanager.services.impl.AddressServiceImpl;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class AddressServiceTest {
@@ -65,7 +65,7 @@ public class AddressServiceTest {
     void shouldThrowExceptionWhenAddressNotFound() {
         when(addressRepo.findById(anyLong())).thenReturn(java.util.Optional.empty());
 
-        assertThrows(ResourseNotFoundException.class, () -> {
+        assertThrows(ResourceNotFoundException.class, () -> {
             addressService.getAddressById(999L);
         });
     }
