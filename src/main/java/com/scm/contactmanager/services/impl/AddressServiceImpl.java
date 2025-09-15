@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.scm.contactmanager.entities.Address;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 import com.scm.contactmanager.repositories.AddressRepo;
 import com.scm.contactmanager.services.AddressService;
 
@@ -21,18 +21,18 @@ public class AddressServiceImpl implements AddressService{
 
     @Override
     public Address getAddressById(Long id) {
-        return addressRepo.findById(id).orElseThrow(() -> new ResourseNotFoundException("Address not found with id: " + id));
+        return addressRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));
     }
 
     @Override
     public void deleteAddress(Long id) {
-        Address address = addressRepo.findById(id).orElseThrow(() -> new ResourseNotFoundException("Address not found with id: " + id));
+        Address address = addressRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));
         addressRepo.delete(address);
     }
 
     @Override
     public Address updateAddress(Address address) {
-        Address existingAddress = addressRepo.findById(address.getId()).orElseThrow(() -> new ResourseNotFoundException("Address not found with id: " + address.getId()));
+        Address existingAddress = addressRepo.findById(address.getId()).orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + address.getId()));
         existingAddress.setStreet(address.getStreet());
         existingAddress.setCity(address.getCity());
         existingAddress.setState(address.getState());

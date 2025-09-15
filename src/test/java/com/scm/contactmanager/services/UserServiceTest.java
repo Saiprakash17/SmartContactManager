@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.repositories.UserRepo;
 import com.scm.contactmanager.services.impl.UserServiceImpl;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -72,7 +72,7 @@ public class UserServiceTest {
     void shouldThrowExceptionWhenUserNotFound() {
         when(userRepo.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
-        assertThrows(ResourseNotFoundException.class, () -> 
+        assertThrows(ResourceNotFoundException.class, () -> 
             userService.getUserByEmail("nonexistent@example.com")
         );
 

@@ -151,15 +151,43 @@ public class PageController {
     }
 
     @PostMapping("/feedback")
-    public String feedback(@ModelAttribute("feedbackForm") FeedbackForm feedbackForm, Model model) {
+    public String feedback(@Valid @ModelAttribute("feedbackForm") FeedbackForm feedbackForm, 
+                         BindingResult bindingResult,
+                         Model model,
+                         HttpSession session) {
         System.out.println("Feedback page requested");
 
-        // Setting the attributes for the about page
-        model.addAttribute("title", "Feedback - Contact Manager");
-        model.addAttribute("message", "Contact Manager is a simple web application to manage your contacts.");
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("title", "Feedback - Contact Manager");
+            model.addAttribute("message", "Please correct the errors in the form.");
+            return "services";
+        }
 
-        emailService.sendFeedbackEmail(feedbackForm.getEmail(), "Contact Manager APP Feedback from: " + feedbackForm.getName(), feedbackForm.getMessage());
-        return "contact";
+        try {
+            if (feedbackForm.getEmail() == null || feedbackForm.getEmail().trim().isEmpty() ||
+                feedbackForm.getName() == null || feedbackForm.getName().trim().isEmpty() ||
+                feedbackForm.getMessage() == null || feedbackForm.getMessage().trim().isEmpty()) {
+                throw new IllegalArgumentException("All fields are required");
+            }
+
+            emailService.sendFeedbackEmail(
+                feedbackForm.getEmail().trim(),
+                "Contact Manager APP Feedback from: " + feedbackForm.getName().trim(),
+                feedbackForm.getMessage().trim()
+            );
+
+            session.setAttribute("message", Message.builder()
+                .type(MessageType.green)
+                .content("Thank you for your feedback!")
+                .build());
+        } catch (Exception e) {
+            session.setAttribute("message", Message.builder()
+                .type(MessageType.red)
+                .content("Error sending feedback: " + e.getMessage())
+                .build());
+        }
+
+        return "redirect:/services";
     }
 
     @GetMapping("/forgot-password")
@@ -168,16 +196,43 @@ public class PageController {
     }
 
     @PostMapping("/forgot-password")
-    public String processForgotPassword(@RequestParam("email") String email, Model model) {
-        User user = userService.getUserByEmail(email);
-        if (user == null) {
-            model.addAttribute("error", "No account found with that email address.");
-            return "forgot_password";
+    public String processForgotPassword(@RequestParam(value = "email", required = false) String email, 
+                                      Model model) {
+        try {
+            if (email == null || email.trim().isEmpty()) {
+                model.addAttribute("error", "Email address is required.");
+                return "forgot_password";
+            }
+
+            email = email.trim().toLowerCase();
+            User user = userService.getUserByEmail(email);
+            
+            if (user == null) {
+                model.addAttribute("error", "No account found with that email address.");
+                return "forgot_password";
+            }
+
+            // Check if a token already exists and is not expired
+            Optional<PasswordResetToken> existingToken = passwordResetTokenService.findValidTokenForUser(user);
+            PasswordResetToken token;
+            
+            if (existingToken.isPresent()) {
+                token = existingToken.get();
+            } else {
+                token = passwordResetTokenService.createTokenForUser(user);
+            }
+
+            String resetLink = UserHelper.getLinkForPasswordReset(token.getToken());
+            emailService.sendEmail(
+                user.getEmail(),
+                "Password Reset Request",
+                "Click the link to reset your password: " + resetLink + "\n\nThis link will expire in 24 hours."
+            );
+
+            model.addAttribute("success", "A password reset link has been sent to your email.");
+        } catch (Exception e) {
+            model.addAttribute("error", "An error occurred while processing your request. Please try again later.");
         }
-        PasswordResetToken token = passwordResetTokenService.createTokenForUser(user);
-        String resetLink = UserHelper.getLinkForPasswordReset(token.getToken());
-        emailService.sendEmail(user.getEmail(), "Password Reset Request", "Click the link to reset your password: " + resetLink);
-        model.addAttribute("success", "A password reset link has been sent to your email.");
         return "forgot_password";
     }
 
@@ -206,20 +261,38 @@ public class PageController {
             model.addAttribute("resetPasswordForm", new ResetPasswordForm());
             return "reset_password";
         }
+
+        // Check for validation errors (including password matching)
         if (bindingResult.hasErrors()) {
             model.addAttribute("token", token);
-            // resetPasswordForm is already present due to @ModelAttribute
             return "reset_password";
         }
-        User user = resetTokenOpt.get().getUser();
-        userService.updatePassword(user, form.getPassword());
-        passwordResetTokenService.deleteToken(resetTokenOpt.get());
-        emailService.sendEmail(user.getEmail(), "Password Changed", "Your password has been changed successfully.");
-        session.setAttribute("message", Message.builder()
-                .type(MessageType.green)
-                .content("Your password has been reset. You can now log in.")
-                .build());
-        return "redirect:/login";
+
+        // Additional check for password match (although @AssertTrue also handles this)
+        if (!form.getPassword().equals(form.getConfirmPassword())) {
+            model.addAttribute("token", token);
+            bindingResult.rejectValue("confirmPassword", "error.confirmPassword", "Passwords do not match");
+            return "reset_password";
+        }
+
+        try {
+            User user = resetTokenOpt.get().getUser();
+            userService.updatePassword(user, form.getPassword());
+            passwordResetTokenService.deleteToken(resetTokenOpt.get());
+            emailService.sendEmail(user.getEmail(), "Password Changed", 
+                "Your password has been successfully changed. If you did not request this change, please contact support immediately.");
+            
+            session.setAttribute("message", Message.builder()
+                    .type(MessageType.green)
+                    .content("Your password has been reset successfully. Please log in with your new password.")
+                    .build());
+            
+            return "redirect:/login";
+        } catch (Exception e) {
+            model.addAttribute("token", token);
+            model.addAttribute("error", "An error occurred while resetting your password. Please try again.");
+            return "reset_password";
+        }
     }
 
 }

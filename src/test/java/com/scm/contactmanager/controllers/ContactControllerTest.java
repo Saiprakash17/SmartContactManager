@@ -19,7 +19,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
-import com.scm.contactmanager.helper.ResourseNotFoundException;
+
+import com.scm.contactmanager.helper.ResourceNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -248,7 +249,7 @@ public class ContactControllerTest {
     @WithMockUser(username = "test@example.com")
     void shouldHandleContactNotFoundForQRCode() throws Exception {
         when(contactService.getContactById(999L))
-            .thenThrow(new ResourseNotFoundException("Contact not found"));
+            .thenThrow(new ResourceNotFoundException("Contact not found"));
 
         mockMvc.perform(get("/user/contacts/qrcode/{id}", 999L))
             .andExpect(status().isNotFound())
