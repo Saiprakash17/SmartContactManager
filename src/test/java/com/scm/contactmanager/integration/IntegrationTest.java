@@ -3,8 +3,12 @@ package com.scm.contactmanager.integration;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +17,28 @@ import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.services.QRCodeGeneratorService;
-import com.scm.contactmanager.config.TestConfig;
+import com.icegreen.greenmail.configuration.GreenMailConfiguration;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.ServerSetupTest;
 
-@SpringBootTest(classes = {com.scm.contactmanager.ContactmanagerApplication.class, TestConfig.class})
-@Transactional
+@SpringBootTest
+@ActiveProfiles("test")
 class IntegrationTest {
+
+    // 2. Register the GreenMail extension. It will start a server on a random free port.
+    @RegisterExtension
+    static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
+            .withConfiguration(GreenMailConfiguration.aConfig().withUser("testUser", "testPass"))
+            .withPerMethodLifecycle(false);
+
+    // 3. Use @DynamicPropertySource to get the random port from the extension
+    //    and set it BEFORE the application starts. This solves the race condition.
+    @DynamicPropertySource
+    static void configureMailHost(DynamicPropertyRegistry registry) {
+        registry.add("spring.mail.host", () -> greenMail.getSmtp().getBindTo());
+        registry.add("spring.mail.port", () -> greenMail.getSmtp().getPort());
+    }
+
 
     @Autowired
     private UserService userService;
@@ -32,13 +53,14 @@ class IntegrationTest {
 
     @Test
     @Sql("/test-data.sql")
+    @Transactional
     void shouldPerformEndToEndContactOperations() {
-        // Create user
-        User user = new User();
-        user.setName("Test User");
-        user.setEmail("test@example.com");
-        user.setPassword("password123");
-        User savedUser = userService.saveUser(user);
+    // Create user with unique email
+    User user = new User();
+    user.setName("Test User");
+    user.setEmail("test_user_" + System.currentTimeMillis() + "@example.com");
+    user.setPassword("password123");
+    User savedUser = userService.saveUser(user);
 
         // Create contact
         Contact contact = new Contact();
@@ -71,12 +93,13 @@ class IntegrationTest {
     }
 
     @Test
+    //@Transactional // Removed to allow commit
     void shouldHandleConcurrentOperations() throws InterruptedException {
-        User user = new User();
-        user.setName("Concurrent Test User");
-        user.setEmail("concurrent@example.com");
-        user.setPassword("password123");
-        User savedUser = userService.saveUser(user);
+    User user = new User();
+    user.setName("Concurrent Test User");
+    user.setEmail("concurrent_" + System.currentTimeMillis() + "@example.com");
+    user.setPassword("password123");
+    User savedUser = userService.saveUser(user);
 
         // Create multiple contacts concurrently
         Thread thread1 = new Thread(() -> {
@@ -99,15 +122,18 @@ class IntegrationTest {
             }
         });
 
-        thread1.start();
-        thread2.start();
-        thread1.join();
-        thread2.join();
+    thread1.start();
+    thread2.start();
+    thread1.join();
+    thread2.join();
 
-        assertEquals(20, contactService.getByUser(savedUser, 0, 100, "name", "asc").getTotalElements());
+    long count = contactService.getByUser(savedUser, 0, 100, "name", "asc").getTotalElements();
+    System.out.println("Concurrent contacts created: " + count);
+    assertEquals(20, count);
     }
 
     @Test
+    @Transactional
     void shouldHandleLargeDataSet() {
         User user = new User();
         user.setName("Large Data Test User");

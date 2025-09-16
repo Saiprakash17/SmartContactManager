@@ -14,6 +14,9 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender eMailSender;
 
+    @Value("${spring.profiles.active:test}")
+    private String activeProfile;
+
     @Value("${spring.mail.properties.domain_name}")
     private String domainName;
 
@@ -23,21 +26,32 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.properties.feedback_from_email}")
     private String feedbackFromEmail;
 
+    @Value("${spring.mail.properties.from_email}")
+    private String fromEmail;
+
     @Override
     public void sendEmail(String to, String subject, String body) {
         if (to == null || to.trim().isEmpty()) {
+            return;
+        }
+        // Skip sending email in test profile
+        if ("test".equals(activeProfile)) {
             return;
         }
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        message.setFrom(domainName);
+        message.setFrom(fromEmail);
         eMailSender.send(message);
     }
 
     @Override
     public void sendFeedbackEmail(String from, String subject, String body) {
+        // Skip sending email in test profile
+        if ("test".equals(activeProfile)) {
+            return;
+        }
         SimpleMailMessage message = new SimpleMailMessage();
         StringBuilder content = new StringBuilder();
         content.append("Feedback From: ").append(from).append("\n\n");

@@ -79,7 +79,11 @@ public class SecurityConfig {
                             .maxAgeInSeconds(31536000)
                     )
                     .contentSecurityPolicy(csp -> csp
-                        .policyDirectives("default-src 'self'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline'")
+                        .policyDirectives("default-src 'self';" +
+                        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;" +
+                        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;" +
+                        "font-src 'self' https://cdnjs.cloudflare.com;" + 
+                        "frame-ancestors 'self'; img-src 'self' *;")
                     )
             );
 

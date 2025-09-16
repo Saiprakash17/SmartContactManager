@@ -21,6 +21,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.scm.contactmanager.helper.ResourceNotFoundException;
+import com.scm.contactmanager.helper.SessionHelper;
+import com.scm.contactmanager.repositories.UserRepo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.scm.contactmanager.config.TestConfig;
+import com.scm.contactmanager.config.TestSecurityConfig;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.services.ContactService;
@@ -41,7 +43,7 @@ import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
 
 @WebMvcTest(ContactController.class)
-@Import(TestConfig.class)
+@Import(TestSecurityConfig.class)
 public class ContactControllerTest {
 
     @Autowired
@@ -59,6 +61,12 @@ public class ContactControllerTest {
     @MockBean
     private QRCodeGeneratorService qrCodeGeneratorService;
 
+    @MockBean(name = "sessionHelper")
+    private SessionHelper sessionHelper;
+    
+    @MockBean
+    private UserRepo userRepo;
+
     private User testUser;
     private Contact testContact;
 
@@ -73,6 +81,8 @@ public class ContactControllerTest {
         testContact.setName("Test Contact");
         testContact.setEmail("contact@example.com");
         testContact.setUser(testUser);
+
+        when(userService.getUserByEmail("test@example.com")).thenReturn(testUser);
     }
 
     @Test
@@ -434,16 +444,29 @@ public class ContactControllerTest {
         when(userService.getUserByEmail("test@example.com")).thenReturn(testUser);
         when(contactService.getContactById(1L)).thenReturn(testContact);
 
-        mockMvc.perform(post("/user/contacts/update_contact/{contactId}", 1L)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        mockMvc.perform(multipart("/user/contacts/update_contact/{contactId}", 1L)
+                // The .contentType() line has been removed
+                //.contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("name", "") // Empty name should cause validation error
                 .param("email", "invalid-email") // Invalid email format
+                .param("phoneNumber", "9876543210")
+                .param("street", "456 Update St")
+                .param("city", "Update City")
+                .param("state", "Update State")
+                .param("country", "Update Country")
+                .param("zipCode", "54321")
+                .param("favorite", "true")
+                .param("description", "Updated description")
+                .param("linkedInLink", "https://linkedin.com/updated")
+                .param("websiteLink", "https://updated.com")
+                .param("relationship", "FRIEND")
                 .with(csrf()))
             .andExpect(status().isOk())
             .andExpect(view().name("user/edit_contact"))
             .andExpect(model().attributeHasFieldErrors("contactForm", "name"))
             .andExpect(model().attributeHasFieldErrors("contactForm", "email"));
     }
+
 
     @Test
     @WithMockUser(username = "test@example.com")
