@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpSession;
 @Component
 public class SessionHelper {
 
-    public static void removeMessage() {
+    public void removeMessage() {
         try {
             System.out.println("removing message from session");
             var requestAttributes = RequestContextHolder.getRequestAttributes();
@@ -23,7 +23,24 @@ public class SessionHelper {
             System.out.println("Error in SessionHelper: " + e);
             e.printStackTrace();
         }
+    }
+    
+    public String getMessage() {
+        var requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null) {
+            HttpSession session = ((ServletRequestAttributes) requestAttributes).getRequest().getSession();
+            String message = (String) session.getAttribute("message");
+            return message;
+        }
+        return null;
+    }
 
+    public void setMessage(String message) {
+        var requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null) {
+            HttpSession session = ((ServletRequestAttributes) requestAttributes).getRequest().getSession();
+            session.setAttribute("message", message);
+        }
     }
 
 }

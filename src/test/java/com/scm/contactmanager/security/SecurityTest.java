@@ -1,38 +1,45 @@
 package com.scm.contactmanager.security;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.Collections;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.scm.contactmanager.config.TestSecurityConfig;
-import com.scm.contactmanager.entities.Contact;
+import com.scm.contactmanager.controllers.PageController;
+import com.scm.contactmanager.controllers.UserController;
+import com.scm.contactmanager.controllers.ContactController;
 import com.scm.contactmanager.entities.User;
+import com.scm.contactmanager.repositories.UserRepo;
 import com.scm.contactmanager.services.ContactService;
+import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.services.EmailService;
+import com.scm.contactmanager.services.PasswordResetTokenService;
+import com.scm.contactmanager.services.ImageService;
+import com.scm.contactmanager.services.impl.SecurityCustomUserDeatilsService;
 
-@SpringBootTest
-@Import(TestSecurityConfig.class)
-@AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application-test.properties")
+@WebMvcTest(controllers = {UserController.class, PageController.class, ContactController.class})
+@Import({TestSecurityConfig.class})
 class SecurityTest {
 
     @Autowired
@@ -44,20 +51,48 @@ class SecurityTest {
     @MockBean
     private ContactService contactService;
 
+    @MockBean
+    private UserRepo userRepo;
+
+    @MockBean
+    private EmailService emailService;
+
+    @MockBean
+    private PasswordResetTokenService passwordResetTokenService;
+
+    @MockBean
+    private ImageService imageService;
+
+    @MockBean
+    private QRCodeGeneratorService qrCodeGeneratorService;
+
+    @MockBean
+    private SecurityCustomUserDeatilsService userDetailsService;
+
+    private User testUser;
+
     @BeforeEach
     void setup() {
-        User testUser = new User();
-        testUser.setId("test-user-id");
-        testUser.setEmail("test@example.com");
-        testUser.setEnabled(true);
-        testUser.setPassword("$2a$10$aMuOvpLPRmtxqWIqdpxKze23fTe6WW/3w.dlzXXuoGm3UjRXDXsYe"); // "testpassword" hashed
-        testUser.setName("Test User");
-        testUser.setRoles(Collections.singletonList("ROLE_USER"));
-        
+        // Create test user
+        testUser = User.builder()
+            .id("test-user-id")
+            .email("test@example.com")
+            .password(new BCryptPasswordEncoder().encode("testpassword"))
+            .name("Test User")
+            .roles(List.of("ROLE_USER"))
+            .enabled(true)
+            .build();
+
+        // Configure mocks
         when(userService.getUserByEmail(anyString())).thenReturn(testUser);
-        Page<Contact> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(contactService.getByUser(any(), any(Integer.class), any(Integer.class), any(), any()))
-            .thenReturn(emptyPage);
+        when(userService.getUserById(anyString())).thenReturn(Optional.of(testUser));
+        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(userDetailsService.loadUserByUsername("test@example.com")).thenReturn(testUser);
+        
+        // Configure contact service mocks
+        when(contactService.getAllContacts()).thenReturn(List.of());
+        when(contactService.getByUser(any(User.class), anyInt(), anyInt(), anyString(), anyString()))
+            .thenReturn(new PageImpl<>(List.of()));
     }
 
     @Test

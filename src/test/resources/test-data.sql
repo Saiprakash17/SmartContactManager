@@ -1,12 +1,19 @@
 -- Clean up existing data
 DELETE FROM contact;
-DELETE FROM user;
+DELETE FROM user_roles;
+DELETE FROM users;
 
 -- Insert test users
-INSERT INTO user (id, name, email, password, role, enabled)
+INSERT INTO users (id, user_name, user_email, user_password, provider, enabled, email_verified)
 VALUES 
-('test-user-1', 'Test User 1', 'test1@example.com', '$2a$10$xyz...', 'ROLE_USER', true),
-('test-user-2', 'Test User 2', 'test2@example.com', '$2a$10$xyz...', 'ROLE_USER', true);
+('test-user-1', 'Test User', 'test@example.com', '$2a$10$O3sOaRXK7qN1W4p.E3A7e.0Sq.YME4SCYXm4V69QYxZOF2PaQxS3y', 'SELF', true, true),
+('test-user-2', 'Test User 2', 'test2@example.com', '$2a$10$xyz...', 'SELF', true, true);
+
+-- Insert user roles
+INSERT INTO user_roles (user_id, role)
+VALUES
+('test-user-1', 'ROLE_USER'),
+('test-user-2', 'ROLE_USER');
 
 -- Insert test contacts
 INSERT INTO contact (id, name, email, phone, relationship, favorite, user_id)
