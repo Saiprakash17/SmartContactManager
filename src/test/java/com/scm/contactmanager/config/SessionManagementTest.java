@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 
 @WebMvcTest(controllers = {UserController.class, PageController.class})
-@Import({SecurityConfig.class, TestSecurityConfig.class})
+@Import(TestSecurityConfig.class)
 class SessionManagementTest {
 
     @MockBean

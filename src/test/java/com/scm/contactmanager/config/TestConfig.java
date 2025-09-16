@@ -26,8 +26,7 @@ import java.util.Map;
 @EnableWebMvc
 @ComponentScan(basePackages = {
     "com.scm.contactmanager.controllers",
-    "com.scm.contactmanager.services",
-    "com.scm.contactmanager.helper"
+    "com.scm.contactmanager.services"
 })
 @Import({
     TestSecurityConfig.class,
