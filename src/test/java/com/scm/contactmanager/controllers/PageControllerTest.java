@@ -19,6 +19,7 @@ import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.services.EmailService;
 import com.scm.contactmanager.services.PasswordResetTokenService;
 import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.repositories.UserRepo;
 
 @WebMvcTest(PageController.class)
 @Import({TestConfig.class, TestSecurityConfig.class})
@@ -29,6 +30,9 @@ public class PageControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private UserRepo userRepo;
 
     @MockBean
     private EmailService emailService;

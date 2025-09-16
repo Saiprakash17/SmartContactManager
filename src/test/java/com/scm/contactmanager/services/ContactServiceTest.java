@@ -14,9 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
@@ -84,7 +82,7 @@ public class ContactServiceTest {
 
     @Test
     void shouldGetContactsByUser() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
+    // ...existing code...
         Page<Contact> contactPage = new PageImpl<>(Arrays.asList(testContact));
         
         when(contactRepo.findByUser(eq(testUser), any(Pageable.class))).thenReturn(contactPage);
@@ -171,7 +169,7 @@ public class ContactServiceTest {
 
     @Test
     void shouldGetFavoriteContacts() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
+    // ...existing code...
         testContact.setFavorite(true);
         Page<Contact> contactPage = new PageImpl<>(Arrays.asList(testContact));
         

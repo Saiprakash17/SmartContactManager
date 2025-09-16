@@ -18,6 +18,7 @@ import com.scm.contactmanager.config.TestConfig;
 import com.scm.contactmanager.config.TestSecurityConfig;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.helper.ResourceNotFoundException;
+import com.scm.contactmanager.repositories.UserRepo;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.config.GlobalExceptionHandler;
@@ -34,6 +35,9 @@ public class ApiControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private UserRepo userRepo;
 
     private Contact testContact;
 

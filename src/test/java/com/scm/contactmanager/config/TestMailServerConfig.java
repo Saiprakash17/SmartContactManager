@@ -19,8 +19,13 @@ public class TestMailServerConfig {
 
     @PostConstruct
     public void startMailServer() {
-        greenMail = new GreenMail(new ServerSetup(port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP));
+        // Use dynamic ports to avoid conflicts
+        ServerSetup serverSetup = new ServerSetup(0, null, "smtp").dynamicPort(); 
+        greenMail = new GreenMail(serverSetup);
         greenMail.start();
+
+        // Override the mail port property for the test context
+        System.setProperty("spring.mail.port", String.valueOf(greenMail.getSmtp().getPort()));
     }
 
     @PreDestroy

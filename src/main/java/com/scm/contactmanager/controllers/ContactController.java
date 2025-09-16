@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
@@ -275,15 +275,24 @@ public class ContactController {
     public String updateContact(@PathVariable("contactId") String contactId,
             @Valid @ModelAttribute ContactForm contactForm,
             BindingResult result,
+            Model model,
             Authentication authentication,
             HttpSession session) {
+
+        // Get the existing contact
+        Long contactIdLong = Long.parseLong(contactId);
+        Contact contact = contactService.getContactById(contactIdLong);
+
         // Validate the form
         if (result.hasErrors()) {
             System.out.println("Errors in form");
+            model.addAttribute("contactId", contactIdLong);
+            model.addAttribute("contactForm", contactForm);
             session.setAttribute("message", Message.builder()
                     .content("Please correct the following errors")
                     .type(MessageType.red)
                     .build());
+            //model.addAttribute("contactForm", contactForm);
             return "user/edit_contact";
         }
 
@@ -296,7 +305,6 @@ public class ContactController {
         address.setCountry(contactForm.getCountry());
 
         // Get and update contact
-        Contact contact = contactService.getContactById(Long.parseLong(contactId));
         contact.setName(contactForm.getName());
         contact.setEmail(contactForm.getEmail());
         contact.setPhoneNumber(contactForm.getPhoneNumber());

@@ -1,20 +1,21 @@
 package com.scm.contactmanager.services;
 
+import com.scm.contactmanager.services.impl.EmailServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.context.ActiveProfiles;
-
-import com.scm.contactmanager.services.impl.EmailServiceImpl;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
+// 1. Replace @SpringBootTest with @ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
     @Mock
@@ -22,6 +23,13 @@ class EmailServiceTest {
 
     @InjectMocks
     private EmailServiceImpl emailService;
+
+    @BeforeEach
+    void setUp() {
+        // 2. Manually set the value for the @Value-annotated field
+        // This simulates what Spring does when it reads application.properties
+        ReflectionTestUtils.setField(emailService, "fromEmail", "test@example.com");
+    }
 
     @Test
     void shouldSendEmail() {
@@ -43,6 +51,7 @@ class EmailServiceTest {
 
         emailService.sendEmail("", subject, text);
 
+        // Verify that the send method is never called if the recipient is empty
         verify(mailSender, never()).send(any(SimpleMailMessage.class));
     }
 
