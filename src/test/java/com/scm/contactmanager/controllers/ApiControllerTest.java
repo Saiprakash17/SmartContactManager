@@ -18,7 +18,6 @@ import com.scm.contactmanager.config.TestConfig;
 import com.scm.contactmanager.config.TestSecurityConfig;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.helper.ResourceNotFoundException;
-import com.scm.contactmanager.helper.ApiResponse;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.config.GlobalExceptionHandler;
