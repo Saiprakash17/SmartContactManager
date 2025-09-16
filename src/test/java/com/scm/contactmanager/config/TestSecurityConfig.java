@@ -7,6 +7,8 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -48,7 +50,11 @@ public class TestSecurityConfig {
                     .defaultSuccessUrl("/user/dashboard", true)
                     .usernameParameter("email")
                     .passwordParameter("password")
-            );
+            )
+            .sessionManagement(session -> {
+                session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                session.maximumSessions(1).maxSessionsPreventsLogin(true);
+            });
 
         return http.build();
     }

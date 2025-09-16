@@ -66,11 +66,6 @@ public class TestConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public UserService userService() {
         return Mockito.mock(UserService.class);
     }

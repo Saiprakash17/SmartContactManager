@@ -11,6 +11,9 @@ import java.util.Optional;
 
 import com.scm.contactmanager.controllers.UserController;
 import com.scm.contactmanager.controllers.PageController;
+import com.scm.contactmanager.services.EmailService;
+import com.scm.contactmanager.services.ImageService;
+import com.scm.contactmanager.services.PasswordResetTokenService;
 import com.scm.contactmanager.services.UserService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +27,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 
 
@@ -37,19 +41,35 @@ class SessionManagementTest {
     @MockBean
     private com.scm.contactmanager.repositories.UserRepo userRepo;
 
+    @MockBean
+    private com.scm.contactmanager.repositories.ContactRepo contactRepo;
+
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private EmailService emailService;
+
+    @MockBean
+    private PasswordResetTokenService passwordResetTokenService;
+
+    @MockBean
+    private ImageService imageService; 
+
     @BeforeEach
     void setUp() {
-        // Set up mock user in UserRepo for SecurityCustomUserDeatilsService
-        com.scm.contactmanager.entities.User user = com.scm.contactmanager.entities.User.builder()
-            .email("test@example.com")
-            .password(new BCryptPasswordEncoder().encode("testpassword"))
-            .roles(List.of("ROLE_USER"))
-            .enabled(true)
-            .build();
-        when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+       // Set up mock user in UserRepo for SecurityCustomUserDeatilsService
+       com.scm.contactmanager.entities.User user = com.scm.contactmanager.entities.User.builder()
+              .name("Test User") // Also add a name to the user object
+              .email("test@example.com")
+              .password(new BCryptPasswordEncoder().encode("testpassword"))
+              .roles(List.of("ROLE_USER"))
+              .enabled(true)
+              .build();
+       when(userRepo.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+       // Add this line to configure the userService mock
+       when(userService.getUserByEmail("test@example.com")).thenReturn(user);
     }
 
     @Test
@@ -119,27 +139,31 @@ class SessionManagementTest {
 
     @Test
     void shouldHandleSessionTimeout() throws Exception {
-        // First login to create a valid session
-        MockHttpSession session = new MockHttpSession();
-        mockMvc.perform(post("/authenticate")
-                .session(session)
+        // 1. Perform a real login to get an authenticated session
+        MvcResult result = mockMvc.perform(post("/authenticate")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("email", "test@example.com")
                 .param("password", "testpassword")
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/user/dashboard"));
+                .andExpect(redirectedUrl("/user/dashboard"))
+                .andReturn();
 
-        // Simulate session timeout
-        session.setMaxInactiveInterval(1);
-        Thread.sleep(1100); // Wait longer than the timeout
+        // 2. Extract the now-authenticated session
+        MockHttpSession session = (MockHttpSession) result.getRequest().getSession();
+        assert session != null;
 
-        // Request after timeout should redirect to login
-        mockMvc.perform(get("/user/dashboard")
-               .session(session)
-               .with(csrf()))
-               .andExpect(status().is3xxRedirection())
-               .andExpect(redirectedUrl("http://localhost/login"));
+        // 3. Follow the redirect to the dashboard to prove the session is valid
+        mockMvc.perform(get("/user/dashboard").session(session))
+                .andExpect(status().isOk());
+
+        // 4. Explicitly invalidate the session to simulate a timeout
+        session.invalidate();
+
+        // 5. Try to access the dashboard again with the invalid session
+        mockMvc.perform(get("/user/dashboard").session(session))
+                .andExpect(status().is3xxRedirection()) // Expect a redirect
+                .andExpect(redirectedUrl("http://localhost/login")); // Verify it goes to the login page
     }
 
     @Test
