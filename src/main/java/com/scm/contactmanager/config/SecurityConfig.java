@@ -15,6 +15,7 @@ import com.scm.contactmanager.services.impl.SecurityCustomUserDeatilsService;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.context.annotation.Profile("!test")
 public class SecurityConfig {
 
     @Autowired
@@ -35,7 +36,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
             // Configure CSRF protection
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/css/**", "/js/**", "/img/**"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/css/**", "/js/**", "/img/**", "/user/contacts/decode-qr"))
             // Configure authorization rules
             .authorizeHttpRequests(authorize ->
                 authorize
@@ -79,11 +80,17 @@ public class SecurityConfig {
                             .maxAgeInSeconds(31536000)
                     )
                     .contentSecurityPolicy(csp -> csp
-                        .policyDirectives("default-src 'self';" +
-                        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;" +
-                        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;" +
-                        "font-src 'self' https://cdnjs.cloudflare.com;" + 
-                        "frame-ancestors 'self'; img-src 'self' *;")
+                        .policyDirectives(
+                            "default-src 'self'; " +
+                            "img-src 'self' data: https: http: blob:; " +
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; " +
+                            "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+                            "connect-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https:; " +
+                            "font-src 'self' data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+                            "worker-src 'self' blob:; " +
+                            "frame-src 'self'; " +
+                            "script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com;"
+                        )
                     )
             );
 

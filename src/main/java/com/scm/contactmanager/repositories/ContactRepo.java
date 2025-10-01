@@ -48,4 +48,14 @@ public interface ContactRepo extends JpaRepository<Contact, Long> {
     // Find favorite contacts for a user (paginated)
     Page<Contact> findByUserAndFavoriteTrue(User user, Pageable pageable);
 
+    // API search method
+    @Query("SELECT c FROM Contact c WHERE " +
+           "LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(c.phoneNumber) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Contact> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneNumberContainingIgnoreCase(
+        @Param("keyword") String keyword,
+        @Param("keyword") String keywordEmail,
+        @Param("keyword") String keywordPhone,
+        Pageable pageable);
 }
