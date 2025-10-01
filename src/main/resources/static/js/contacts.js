@@ -1,7 +1,6 @@
 console.log("contacts.js loaded");
 const viewContactModal = document.getElementById("view_contact_modal");
-const baseURL = "http://localhost:8080";
-// const baseURL = "http://conatctmanager.us-east-2.elasticbeanstalk.com";
+const baseURL = window.location.protocol + '//' + window.location.host;
 
 // options with default values
 const options = {
@@ -40,32 +39,102 @@ function closeContactModal() {
 }
 
 async function loadContactdata(id) {
-  //function call to load data
-  console.log(id);
+  if (!id) {
+    console.error("Contact ID is undefined");
+    alert("Error: Contact ID is missing");
+    return;
+  }
+
   try {
-    const data = await (await fetch(`${baseURL}/api/contact/${id}`)).json();
-    document.querySelector("#contact_name").innerHTML = data.name;
-    document.querySelector("#contact_email").innerHTML = data.email;
-    document.querySelector("#contact_image").src = data.imageUrl;
-    let address = data.address.street + ", " + data.address.city + ", " + data.address.state + ", " + data.address.country + ", " + data.address.zipCode;
-    document.querySelector("#contact_address").innerHTML = address;
-    document.querySelector("#contact_phone").innerHTML = data.phoneNumber;
-    document.querySelector("#contact_about").innerHTML = data.about;
-    const contactFavorite = document.querySelector("#contact_favorite");
-    if (data.favorite) {
-      contactFavorite.innerHTML =
-        "<i class='fas fa-star text-yellow-400'></i><i class='fas fa-star text-yellow-400'></i><i class='fas fa-star text-yellow-400'></i><i class='fas fa-star text-yellow-400'></i><i class='fas fa-star text-yellow-400'></i>";
-    } else {
-      contactFavorite.innerHTML = "Not Favorite Contact";
+    // Show loading state
+    const loadingModal = Swal.fire({
+      title: 'Loading...',
+      text: 'Fetching contact details',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    const response = await fetch(`${baseURL}/api/contact/${id}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    if (!result || !result.data) {
+      throw new Error("No data received from server");
     }
 
-    document.querySelector("#contact_website").href = data.website;
-    document.querySelector("#contact_website").innerHTML = data.website;
-    document.querySelector("#contact_linkedIn").href = data.linkedin;
-    document.querySelector("#contact_linkedIn").innerHTML = data.linkedin;
+    const data = result.data;
+
+    // Close loading modal
+    loadingModal.close();
+
+    // Update modal content
+    document.querySelector("#contact_name").textContent = data.name || "N/A";
+    document.querySelector("#contact_email").textContent = data.email || "N/A";
+    document.querySelector("#contact_phone").textContent = data.phoneNumber || "N/A";
+    
+    const contactImage = document.querySelector("#contact_image");
+    if (contactImage) {
+      contactImage.src = data.imageUrl || "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
+      contactImage.onerror = function() {
+        this.src = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
+      };
+    }
+    
+    let address = data.address ? 
+      `${data.address.street || ''}, ${data.address.city || ''}, ${data.address.state || ''}, ${data.address.country || ''}, ${data.address.zipCode || ''}`.replace(/^[, ]+|[, ]+$/g, '') :
+      "No address available";
+    document.querySelector("#contact_address").textContent = address;
+    
+    document.querySelector("#contact_about").textContent = data.about || "N/A";
+    
+    const contactFavorite = document.querySelector("#contact_favorite");
+    if (contactFavorite) {
+      if (data.favorite) {
+        contactFavorite.innerHTML = "<i class='fas fa-star text-yellow-400'></i>".repeat(5);
+      } else {
+        contactFavorite.textContent = "Not Favorite Contact";
+      }
+    }
+
+    const websiteElement = document.querySelector("#contact_website");
+    const linkedInElement = document.querySelector("#contact_linkedIn");
+    
+    if (websiteElement) {
+      websiteElement.href = data.website || "#";
+      websiteElement.textContent = data.website || "N/A";
+    }
+    
+    if (linkedInElement) {
+      linkedInElement.href = data.linkedin || "#";
+      linkedInElement.textContent = data.linkedin || "N/A";
+    }
+
+    const relationshipElement = document.querySelector("#contact_relationship");
+    if (relationshipElement && data.relationship) {
+      relationshipElement.textContent = data.relationship.label || "N/A";
+    }
+    
     openContactModal();
   } catch (error) {
-    console.log("Error: ", error);
+    console.error("Error loading contact data:", error);
+    Swal.fire({
+      title: 'Error',
+      text: 'Failed to load contact details. Please try again.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+      background: document.documentElement.classList.contains('dark') ? '#1a202c' : '#fff',
+      color: document.documentElement.classList.contains('dark') ? '#fff' : '#222',
+      customClass: {
+        confirmButton: 'swal2-confirm bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800',
+        popup: document.documentElement.classList.contains('dark') ? 'dark-mode-swal' : ''
+      },
+      buttonsStyling: false
+    });
   }
 }
 
@@ -93,40 +162,85 @@ async function deleteContact(id) {
     });
   }
   // Download QR code image by id
-function downloadQR(id, qrUrl) {
-  let url = qrUrl && qrUrl.trim() ? qrUrl.trim() : '';
-  if (!url) {
-    const img = document.getElementById('qr-img-' + id);
-    if (img) url = img.src;
-  }
-  if (!url) return alert('QR code not found.');
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'contact_qr_' + id + '.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+async function downloadQR(id, qrUrl) {
+  try {
+    let url = qrUrl && qrUrl.trim() ? qrUrl.trim() : '';
+    if (!url) {
+      const img = document.getElementById('qr-img-' + id);
+      if (img) url = img.src;
+    }
+    if (!url) {
+      throw new Error('QR code URL not found');
+    }
 
-// Share QR code image by id
-function shareQR(id, qrUrl) {
-  let url = qrUrl && qrUrl.trim() ? qrUrl.trim() : '';
-  if (!url) {
-    const img = document.getElementById('qr-img-' + id);
-    if (img) url = img.src;
-  }
-  if (!url) return alert('QR code not found.');
-  if (navigator.share) {
-    navigator.share({
-      title: 'Contact QR',
-      url: url
+    // Fetch the QR code image
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch QR code');
+    }
+    const blob = await response.blob();
+
+    // Create download link
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'contact_qr_' + id + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  } catch (error) {
+    console.error('Error downloading QR code:', error);
+    Swal.fire({
+      title: 'Error',
+      text: error.message || 'Failed to download QR code',
+      icon: 'error',
+      confirmButtonText: 'OK'
     });
-  } else {
-    alert('Share not supported on this browser.');
   }
 }
 
-// Show QR modal using SweetAlert2
+  // Share QR code image by id
+async function shareQR(id, qrUrl) {
+  try {
+    let url = qrUrl && qrUrl.trim() ? qrUrl.trim() : '';
+    if (!url) {
+      const img = document.getElementById('qr-img-' + id);
+      if (img) url = img.src;
+    }
+    if (!url) {
+      throw new Error('QR code URL not found');
+    }
+
+    // Fetch the QR code image
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], 'contact_qr_' + id + '.png', { type: 'image/png' });
+
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: 'Contact QR Code',
+        text: 'Here is the QR code for the contact',
+        files: [file]
+      });
+    } else if (navigator.share) {
+      await navigator.share({
+        title: 'Contact QR Code',
+        text: 'Here is the QR code for the contact',
+        url: url
+      });
+    } else {
+      throw new Error('Share not supported on this browser');
+    }
+  } catch (error) {
+    console.error('Error sharing QR code:', error);
+    Swal.fire({
+      title: 'Error',
+      text: error.message || 'Failed to share QR code',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+}// Show QR modal using SweetAlert2
 function showQRModal(id, qrUrl) {
   Swal.fire({
     title: 'Contact QR',
@@ -150,20 +264,13 @@ function exportData(isFavorite) {
     alert('No rows selected for export.');
     return;
   }
-  const customTable = document.createElement('table');
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
+
   const headers = isFavorite
     ? ["Name", "Email", "Phone", "Relationship", "Address", "Links", "About", "Image"]
     : ["Name", "Email", "Phone", "Relationship", "Address", "Links", "About", "Image", "Favorite"];
-  headers.forEach(headerText => {
-    const th = document.createElement('th');
-    th.textContent = headerText;
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-  customTable.appendChild(thead);
-  const tbody = document.createElement('tbody');
+
+  const data = [headers];
+
   rows.forEach(row => {
     const name = row.querySelector("td:nth-child(2) div.text-base")?.textContent.trim() || "N/A";
     const email = row.querySelector("td:nth-child(2) div.font-normal")?.textContent.trim() || "N/A";
@@ -179,21 +286,13 @@ function exportData(isFavorite) {
       const favorite = row.querySelector("td:nth-child(5) i.fa-heart") ? "Yes" : "No";
       cells.push(favorite);
     }
-    const customRow = document.createElement('tr');
-    cells.forEach(cellText => {
-      const td = document.createElement('td');
-      td.textContent = cellText;
-      customRow.appendChild(td);
-    });
-    tbody.appendChild(customRow);
+    data.push(cells);
   });
-  customTable.appendChild(tbody);
-  TableToExcel.convert(customTable, {
-    name: isFavorite ? "Selected_Favorite_Contacts.xlsx" : "Selected_Contacts.xlsx",
-    sheet: {
-      name: isFavorite ? "Favorite Contacts" : "Contacts"
-    }
-  });
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, isFavorite ? "Favorite Contacts" : "Contacts");
+  XLSX.writeFile(wb, isFavorite ? "Selected_Favorite_Contacts.xlsx" : "Selected_Contacts.xlsx");
 }
 
 // Select all checkboxes

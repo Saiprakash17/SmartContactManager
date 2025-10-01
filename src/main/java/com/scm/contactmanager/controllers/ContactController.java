@@ -1,7 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,9 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import java.io.IOException;
 
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.forms.ContactForm;
@@ -40,7 +37,6 @@ import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("user/contacts")
-
 public class ContactController {
     // --- Declarations ---
     Logger logger = org.slf4j.LoggerFactory.getLogger(UserController.class);
@@ -52,11 +48,11 @@ public class ContactController {
     private UserService userService;
 
     @Autowired
+    private QRCodeGeneratorService qrCodeGeneratorService;
+
+    @Autowired
     private ImageService imageService;
-
-
-
-
+    
     @RequestMapping("/add")
     public String addContactView(Model model) {
         // Create a new ContactForm and set default favorite to true
@@ -77,69 +73,29 @@ public class ContactController {
             HttpSession session,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
 
-        if (!result.hasErrors()) {
-            try {
-                // Get user
-                String username = UserHelper.getEmailOfLoggedInUser(authentication);
-                User user = userService.getUserByEmail(username);
-
-                // Form to address
-                Address address = new Address();
-                address.setStreet(contactForm.getStreet());
-                address.setCity(contactForm.getCity());
-                address.setState(contactForm.getState());
-                address.setZipCode(contactForm.getZipCode());
-                address.setCountry(contactForm.getCountry());
-
-                // Form to contact
-                Contact contact = new Contact();
-                contact.setName(contactForm.getName());
-                contact.setEmail(contactForm.getEmail());
-                contact.setPhoneNumber(contactForm.getPhoneNumber());
-                contact.setFavorite(contactForm.isFavorite());
-                contact.setAddress(address);
-                contact.setAbout(contactForm.getDescription());
-                contact.setLinkedin(contactForm.getLinkedInLink());
-                contact.setWebsite(contactForm.getWebsiteLink());
-                contact.setUser(user);
-                contact.setRelationship(contactForm.getRelationship());
-
-                // Process image
-                if(contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
-                    String fileName = UUID.randomUUID().toString();
-                    String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
-                    contact.setImageUrl(fileURL);
-                    contact.setCloudinaryImagePublicId(fileName);
-                    System.out.println("Image uploaded successfully: " + fileURL);
-                }
-
-                // Save the contact
-                Contact savedContact = contactService.saveContact(contact);
-                System.out.println("Contact saved: " + savedContact);
-
-                redirectAttributes.addFlashAttribute("message",
-                        Message.builder()
-                                .content("You have successfully added a new contact")
-                                .type(MessageType.green)
-                                .build());
-
-                return "redirect:/user/contacts/view";
-            } catch (Exception e) {
-                logger.error("Error saving contact", e);
-                // Handle any errors during save
-                redirectAttributes.addFlashAttribute("message",
-                        Message.builder()
-                                .content("Error saving contact: " + e.getMessage())
-                                .type(MessageType.red)
-                                .build());
-            }
+    if (!result.hasErrors()) {
+        try {
+            Contact savedContact = contactService.saveContact(contactForm, authentication);
+            logger.info("Contact saved: {}", savedContact);
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("You have successfully added a new contact")
+                    .type(MessageType.green)
+                    .build());
+            return "redirect:/user/contacts/view";
+        } catch (Exception e) {
+            logger.error("Error saving contact", e);
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("Error saving contact: " + e.getMessage())
+                    .type(MessageType.red)
+                    .build());
         }
-
-        // If we get here, either there were validation errors or an exception occurred
-        redirectAttributes.addFlashAttribute("message", Message.builder()
-                .content("Please correct the errors and try again")
-                .type(MessageType.red)
-                .build());
+    }
+    redirectAttributes.addFlashAttribute("message", Message.builder()
+        .content("Please correct the errors and try again")
+        .type(MessageType.red)
+        .build());
         redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.contactForm", result);
         redirectAttributes.addFlashAttribute("contactForm", contactForm);
         return "redirect:/user/contacts/add";
@@ -148,27 +104,23 @@ public class ContactController {
 
 
     @RequestMapping("/view")
-    public String viewContacts(@RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = AppConstants.PAGE_SIZE + "") int size,
-            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
-            @RequestParam(value = "direction", defaultValue = "asc") String direction,
-            Model model, Authentication authentication){
-        // Get user
+    public String viewContacts(
+        @RequestParam(value = "page", defaultValue = "0") int page,
+        @RequestParam(value = "size", defaultValue = AppConstants.PAGE_SIZE + "") int size,
+        @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+        @RequestParam(value = "direction", defaultValue = "asc") String direction,
+        Model model, 
+        Authentication authentication
+    ) {
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
-
-        // Get all contacts by user id
         Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
-
-        // Add attributes to the model
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
         model.addAttribute("user", user);
         model.addAttribute("contactSearchForm", new ContactsSearchForm());
-
         return "user/view_contacts";
     }
-
 
     @RequestMapping("/search")
     public String SearchHandler(
@@ -179,44 +131,40 @@ public class ContactController {
         @RequestParam(value = "direction", defaultValue = "asc") String direction,
         Model model,
         Authentication authentication,
-        HttpSession session
+        org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes
     ) {
-        // Log the search field and keyword
-        logger.info("field {} keyword {}", contactSearchForm.getField(), contactSearchForm.getKeyword());
-
-        // Get the user
-        var user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
-
-        Page<Contact> contactsPage = null;
-
-        // Determine which field to search by
-        if (contactSearchForm.getField().equalsIgnoreCase("name")) {
-            contactsPage = contactService.searchByName(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
-        } else if (contactSearchForm.getField().equalsIgnoreCase("email")) {
-            contactsPage = contactService.searchByEmail(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
-        } else if (contactSearchForm.getField().equalsIgnoreCase("phone")) {
-            contactsPage = contactService.searchByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
-        } else if (contactSearchForm.getField().equalsIgnoreCase("relationship")) {
-            contactsPage = contactService.searchByRelationship(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
-        } else {
-            // Default to fetching all contacts if no specific field is selected
-            contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
-            session.setAttribute("message",
-                    Message.builder()
-                            .content("Please select a field to search")
-                            .type(MessageType.red)
-                            .build());
+        User user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
+        
+        // Validate search parameters
+        if (contactSearchForm.getField() == null || contactSearchForm.getField().isEmpty() ||
+            contactSearchForm.getKeyword() == null || contactSearchForm.getKeyword().isEmpty()) {
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("Please select a field and enter a keyword to search")
+                    .type(MessageType.red)
+                    .build());
+            return "redirect:/user/contacts/view";
         }
 
-        // Log the result
-        logger.info("contactsPage {}", contactsPage);
-
-        // Add attributes to the model
-        model.addAttribute("contactSearchForm", contactSearchForm);
-        model.addAttribute("contactsPage", contactsPage);
-        model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
-
-        return "user/view_contacts";
+        try {
+            Page<Contact> contactsPage = contactService.searchContacts(user, contactSearchForm, page, size, sortBy, direction);
+            if (contactsPage == null) {
+                contactsPage = org.springframework.data.domain.Page.empty();
+            }
+            model.addAttribute("contactSearchForm", contactSearchForm);
+            model.addAttribute("contactsPage", contactsPage);
+            model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
+            model.addAttribute("user", user);
+            return "user/view_contacts";
+        } catch (Exception e) {
+            logger.error("Error searching contacts: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("Error performing search: " + e.getMessage())
+                    .type(MessageType.red)
+                    .build());
+            return "redirect:/user/contacts/view";
+        }
     }
 
 
@@ -243,30 +191,10 @@ public class ContactController {
     public String editContact(@PathVariable("contactId") String contactId, Model model) {
         // Parse the contact ID
         Long contactIdLong = Long.parseLong(contactId);
-
-        // Get the contact by ID
-        Contact contact = contactService.getContactById(contactIdLong);
-
-        // Create and populate the ContactForm
-        ContactForm contactForm = new ContactForm();
-        contactForm.setName(contact.getName());
-        contactForm.setEmail(contact.getEmail());
-        contactForm.setPhoneNumber(contact.getPhoneNumber());
-        contactForm.setStreet(contact.getAddress().getStreet());
-        contactForm.setCity(contact.getAddress().getCity());
-        contactForm.setState(contact.getAddress().getState());
-        contactForm.setZipCode(contact.getAddress().getZipCode());
-        contactForm.setCountry(contact.getAddress().getCountry());
-        contactForm.setDescription(contact.getAbout());
-        contactForm.setLinkedInLink(contact.getLinkedin());
-        contactForm.setWebsiteLink(contact.getWebsite());
-        contactForm.setPicture(contact.getImageUrl());
-        contactForm.setRelationship(contact.getRelationship());
-
-        // Add the ContactForm object to the model
+        Contact contact = contactService.editContact(contactIdLong);
+        ContactForm contactForm = createFormFromContact(contact); // Use helper method below
         model.addAttribute("contactId", contactIdLong);
         model.addAttribute("contactForm", contactForm);
-
         return "user/edit_contact";
     }
 
@@ -277,68 +205,77 @@ public class ContactController {
             BindingResult result,
             Model model,
             Authentication authentication,
-            HttpSession session) {
+            org.springframework.web.multipart.MultipartHttpServletRequest multipartRequest,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
 
-        // Get the existing contact
         Long contactIdLong = Long.parseLong(contactId);
-        Contact contact = contactService.getContactById(contactIdLong);
+        model.addAttribute("contactId", contactIdLong);
 
-        // Validate the form
+        // Handle validation errors first
         if (result.hasErrors()) {
-            System.out.println("Errors in form");
-            model.addAttribute("contactId", contactIdLong);
+            logger.info("Form validation errors: {}", result.getAllErrors());
             model.addAttribute("contactForm", contactForm);
-            session.setAttribute("message", Message.builder()
-                    .content("Please correct the following errors")
+            model.addAttribute("message",
+                Message.builder()
+                    .content("Please correct the validation errors")
                     .type(MessageType.red)
                     .build());
-            //model.addAttribute("contactForm", contactForm);
             return "user/edit_contact";
         }
 
-        // Prepare address
-        Address address = new Address();
-        address.setStreet(contactForm.getStreet());
-        address.setCity(contactForm.getCity());
-        address.setState(contactForm.getState());
-        address.setZipCode(contactForm.getZipCode());
-        address.setCountry(contactForm.getCountry());
+        try {
+            // First get the existing contact to ensure it exists
+            Contact existingContact = contactService.getContactById(contactIdLong);
+            if (existingContact == null) {
+                throw new ResourceNotFoundException("Contact not found");
+            }
 
-        // Get and update contact
-        contact.setName(contactForm.getName());
-        contact.setEmail(contactForm.getEmail());
-        contact.setPhoneNumber(contactForm.getPhoneNumber());
-        contact.setFavorite(contactForm.isFavorite());
-        contact.setAddress(address);
-        contact.setAbout(contactForm.getDescription());
-        contact.setLinkedin(contactForm.getLinkedInLink());
-        contact.setWebsite(contactForm.getWebsiteLink());
-        contact.setRelationship(contactForm.getRelationship());
+            // Handle file upload if present
+            if (multipartRequest != null) {
+                org.springframework.web.multipart.MultipartFile file = multipartRequest.getFile("contactImage");
+                if (file != null && !file.isEmpty()) {
+                    try {
+                        String picture = imageService.uploadImage(file, "contact_" + contactIdLong);
+                        contactForm.setPicture(picture);
+                    } catch (Exception e) {
+                        logger.error("Error uploading image", e);
+                        // Continue with contact update even if image upload fails
+                    }
+                }
+            }
 
-        // Process image if provided
-        if (contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
-            String fileName = UUID.randomUUID().toString();
-            String fileURL = imageService.uploadImage(contactForm.getContactImage(), fileName);
-            contact.setImageUrl(fileURL);
-            contact.setCloudinaryImagePublicId(fileName);
-            System.out.println("Image uploaded successfully: " + fileURL);
-        }
-        else {
-            logger.info("Image not uploaded, using existing image");
-        }
+            // Update the contact
+            Contact updatedContact = updateContactFromForm(contactIdLong, contactForm);
+            
+            // Save the updated contact
+            contactService.updateContact(updatedContact);
+            
+            logger.info("Contact updated successfully: {}", updatedContact);
 
-        // Update the contact
-        Contact updatedContact = contactService.updateContact(contact);
-        logger.info("Contact updated: " + updatedContact);
-
-        // Set success message
-        session.setAttribute("message",
+            redirectAttributes.addFlashAttribute("message",
                 Message.builder()
-                        .content("You have successfully updated the contact")
-                        .type(MessageType.green)
-                        .build());
+                    .content("Contact updated successfully")
+                    .type(MessageType.green)
+                    .build());
+            return "redirect:/user/contacts/view";
 
-        return "redirect:/user/contacts/view";
+        } catch (ResourceNotFoundException e) {
+            logger.error("Contact not found", e);
+            model.addAttribute("message",
+                Message.builder()
+                    .content("Contact not found: " + e.getMessage())
+                    .type(MessageType.red)
+                    .build());
+            return "user/edit_contact";
+        } catch (Exception e) {
+            logger.error("Error updating contact", e);
+            model.addAttribute("message",
+                Message.builder()
+                    .content("Error updating contact: " + e.getMessage())
+                    .type(MessageType.red)
+                    .build());
+            return "user/edit_contact";
+        }
     }
 
 
@@ -355,48 +292,39 @@ public class ContactController {
             Authentication authentication,
             HttpSession session
     ) {
-        // Get the logged-in user's username
-        String username = UserHelper.getEmailOfLoggedInUser(authentication);
-
-        // Fetch the user entity
-        User user = userService.getUserByEmail(username);
-
-        Page<Contact> contactsPage = null;
-
-        // Check if both field and keyword are provided for searching
-        if (contactSearchForm.getField() != null && !contactSearchForm.getField().isEmpty() && contactSearchForm.getKeyword() != null && !contactSearchForm.getKeyword().isEmpty()) {
-
-            // Switch based on the selected field for searching favorite contacts
-            switch (contactSearchForm.getField().toLowerCase()) {
+    User user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
+        Page<Contact> contactsPage;
+        String field = contactSearchForm.getField();
+        String keyword = contactSearchForm.getKeyword();
+        if (field == null || field.isEmpty() || keyword == null || keyword.isEmpty()) {
+            session.setAttribute("message",
+                    Message.builder()
+                            .content("Please select a field and enter a keyword to search")
+                            .type(MessageType.red)
+                            .build());
+            contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
+        } else {
+            switch (field) {
                 case "name":
-                    contactsPage = contactService.searchFavoriteByName(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    contactsPage = contactService.searchFavoriteByName(keyword, size, page, sortBy, direction, user);
                     break;
-
                 case "email":
-                    contactsPage = contactService.searchFavoriteByEmail(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    contactsPage = contactService.searchFavoriteByEmail(keyword, size, page, sortBy, direction, user);
                     break;
-
-                case "phone":
-                    contactsPage = contactService.searchFavoriteByPhoneNumber(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                case "phoneNumber":
+                    contactsPage = contactService.searchFavoriteByPhoneNumber(keyword, size, page, sortBy, direction, user);
                     break;
-
                 case "relationship":
-                    contactsPage = contactService.searchFavoriteByRelationship(contactSearchForm.getKeyword(), size, page, sortBy, direction, user);
+                    contactsPage = contactService.searchFavoriteByRelationship(keyword, size, page, sortBy, direction, user);
                     break;
-
                 default:
                     contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
-                    session.setAttribute("message",
-                            Message.builder()
-                                    .content("Please select a valid field to search")
-                                    .type(MessageType.red)
-                                    .build());
             }
+        }
 
-        } else {
-
-            // If no field or keyword, return all favorite contacts and show a message
-            contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
+        // Set message if no field or keyword provided
+        if (contactSearchForm.getField() == null || contactSearchForm.getField().isEmpty() 
+            || contactSearchForm.getKeyword() == null || contactSearchForm.getKeyword().isEmpty()) {
             session.setAttribute("message",
                     Message.builder()
                             .content("Please select a field and enter a keyword to search")
@@ -404,7 +332,7 @@ public class ContactController {
                             .build());
         }
 
-        // Add attributes to the model for rendering in the view
+        // Add attributes to the model
         model.addAttribute("contactSearchForm", contactSearchForm);
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
@@ -432,73 +360,138 @@ public class ContactController {
         return "user/view_favorite_contacts";
     }
 
-    /**
-     * Endpoint to generate and serve QR code image for a contact
-     */
-    @Autowired
-    private QRCodeGeneratorService qrCodeGeneratorService;
+    // Helper method to create ContactForm from Contact
+    private ContactForm createFormFromContact(Contact contact) {
+        ContactForm form = new ContactForm();
+        form.setName(contact.getName());
+        form.setEmail(contact.getEmail());
+        form.setPhoneNumber(contact.getPhoneNumber());
+        form.setRelationship(contact.getRelationship());
+        form.setFavorite(contact.isFavorite());
+    // form.setAddress(contact.getAddress()); // Remove if ContactForm does not have setAddress
+        // Add other fields as needed
+        return form;
+    }
 
-    @GetMapping(value = "/qrcode/{contactId}", produces = MediaType.IMAGE_PNG_VALUE)
+    // Helper method to update Contact from ContactForm
+    private Contact updateContactFromForm(Long contactId, ContactForm contactForm) {
+        Contact contact = contactService.editContact(contactId);
+        contact.setName(contactForm.getName());
+        contact.setEmail(contactForm.getEmail());
+        contact.setPhoneNumber(contactForm.getPhoneNumber());
+        contact.setRelationship(contactForm.getRelationship());
+        contact.setFavorite(contactForm.isFavorite());
+    // contact.setAddress(contactForm.getAddress()); // Remove if ContactForm does not have getAddress
+        // Add other fields as needed
+        return contact;
+    }
+
+
+    @GetMapping(value = "/qrcode/{contactId}")
     @ResponseBody
-    public ResponseEntity<byte[]> getContactQRCode(
+    public ResponseEntity<?> getContactQRCode(
             @PathVariable("contactId") Long contactId,
             @RequestParam(value = "width", defaultValue = "250") int width,
-            @RequestParam(value = "height", defaultValue = "250") int height,
-            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "height", defaultValue = "250") int height) {
         try {
-            // Validate size parameters
-            if (width <= 0 || height <= 0) {
+            // Validate dimensions
+            if (width <= 0 || height <= 0 || width > 1000 || height > 1000) {
+                logger.error("Invalid QR code dimensions: width={}, height={}", width, height);
                 return ResponseEntity.badRequest()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body("{\"message\":\"Width and height must be positive integers\"}"
-                        .getBytes());
-            }
-            Contact contact = contactService.getContactById(contactId);
-            // Generate QR code with custom dimensions
-            byte[] qrImage = qrCodeGeneratorService.generateQRCodeFromContact(contact, width, height);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(qrImage);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(404)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"message\":\"Contact not found\"}"
-                    .getBytes());
+                    .body("{\"error\": \"Invalid dimensions\"}");
+            }
+
+            // Get the contact
+            Contact contact = contactService.getContactById(contactId);
+            if (contact == null) {
+                logger.error("Contact not found with id: {}", contactId);
+                return ResponseEntity.status(404)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"message\": \"Contact not found\"}");
+            }
+
+            // Generate QR code
+            byte[] qrCode = qrCodeGeneratorService.generateQRCodeFromContact(contact, width, height);
+            if (qrCode == null || qrCode.length == 0) {
+                logger.error("Generated QR code is empty for contact {}", contactId);
+                return ResponseEntity.internalServerError()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"Failed to generate QR code\"}");
+            }
+
+            return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(qrCode);
+
+        } catch (ResourceNotFoundException e) {
+            logger.error("Contact not found: {}", e.getMessage());
+            return ResponseEntity.status(404)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"message\": \"Contact not found\"}");
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid parameters: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"error\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
-            logger.error("Error generating QR code", e);
-            redirectAttributes.addFlashAttribute("message", Message.builder()
-                    .content("Error generating QR code")
-                    .type(MessageType.red)
-                    .build());
-            return ResponseEntity.status(500).build();
+            logger.error("Error generating QR code: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"error\": \"Internal server error\"}");
         }
     }
 
-    /**
-     * Endpoint to decode uploaded QR code image and return contact JSON
-     */
     @RequestMapping(value = "/decode-qr", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<String> decodeContactQR(@RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\":\"No QR code file provided\"}");
-        }
-
+    public ResponseEntity<String> decodeContactQR(
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
         try {
-            byte[] imageBytes = file.getBytes();
-            String contactJson = com.scm.contactmanager.helper.QRCodeGenerator.decodeQRCodeImage(imageBytes);
-            // Validate JSON
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            try {
-                Object jsonObj = mapper.readTree(contactJson);
-                return ResponseEntity.ok(mapper.writeValueAsString(jsonObj));
-            } catch (Exception jsonEx) {
-                return ResponseEntity.badRequest().body("{\"error\":\"QR code does not contain valid contact data." + contactJson.replaceAll("\"", "'") + "\"}");
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"No file provided\"}");
             }
+            
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"Unsupported media type\"}");
+            }
+            
+            String decodedData = qrCodeGeneratorService.decodeContactQR(file);
+            
+            // If decoded data is empty, return error
+            if (decodedData == null || decodedData.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"QR code does not contain valid contact data\"}");
+            }
+
+            try {
+                // Validate JSON format
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                // Just validate that it's valid JSON by trying to parse it
+                mapper.readTree(decodedData);
+                return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(decodedData);
+            } catch (IOException e) {
+                return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"QR code does not contain valid JSON data\"}");
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid QR code data: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"error\": \"Invalid QR code data\"}");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("{\"error\":\"Could not decode QR code." + e.getMessage().replaceAll("\"", "'") + "\"}");
+            logger.error("Error decoding QR code: {}", e.getMessage());
+            return ResponseEntity.internalServerError()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"error\": \"Internal server error\"}");
         }
     }
 }

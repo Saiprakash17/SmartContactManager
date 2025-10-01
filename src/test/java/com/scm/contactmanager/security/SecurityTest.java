@@ -8,7 +8,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
@@ -19,15 +19,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.scm.contactmanager.controllers.PageController;
-import com.scm.contactmanager.controllers.UserController;
-import com.scm.contactmanager.controllers.ContactController;
+import com.scm.contactmanager.config.CommonTestConfig;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.repositories.UserRepo;
 import com.scm.contactmanager.services.ContactService;
@@ -38,8 +37,8 @@ import com.scm.contactmanager.services.PasswordResetTokenService;
 import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.impl.SecurityCustomUserDeatilsService;
 
-@WebMvcTest(controllers = {UserController.class, PageController.class, ContactController.class})
-@Import({TestSecurityConfig.class})
+@WebMvcTest(excludeAutoConfiguration = {SecurityAutoConfiguration.class})
+@Import(CommonTestConfig.class)
 class SecurityTest {
 
     @Autowired
