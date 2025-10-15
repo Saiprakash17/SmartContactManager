@@ -1,6 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -15,13 +14,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.scm.contactmanager.config.CommonTestConfig;
+import com.scm.contactmanager.config.GlobalExceptionHandler;
+import com.scm.contactmanager.config.TestSecurityConfig;
+import com.scm.contactmanager.config.TestApiConfig;
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.helper.ResourceNotFoundException;
 import com.scm.contactmanager.services.ApiService;
-import com.scm.contactmanager.config.GlobalExceptionHandler;
 
 @WebMvcTest(ApiController.class)
-@Import({CommonTestConfig.class, GlobalExceptionHandler.class})
+@Import({CommonTestConfig.class, GlobalExceptionHandler.class, TestSecurityConfig.class, TestApiConfig.class})
 public class ApiControllerTest {
 
     @Autowired

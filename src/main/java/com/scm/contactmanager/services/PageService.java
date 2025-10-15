@@ -1,6 +1,5 @@
 package com.scm.contactmanager.services;
 
-import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.forms.UserForm;
 import com.scm.contactmanager.forms.FeedbackForm;
 import com.scm.contactmanager.forms.ResetPasswordForm;
