@@ -3,17 +3,17 @@ package com.scm.contactmanager.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.scm.contactmanager.services.impl.SecurityCustomUserDeatilsService;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 @org.springframework.context.annotation.Profile("!test")
 public class SecurityConfig {
@@ -24,12 +24,11 @@ public class SecurityConfig {
     @Autowired
     private AuthFailtureHandler authFailtureHandler;
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        return daoAuthenticationProvider;
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+            .userDetailsService(userDetailsService)
+            .passwordEncoder(passwordEncoder());
     }
 
     @Bean
@@ -63,10 +62,12 @@ public class SecurityConfig {
                     .deleteCookies("JSESSIONID")
             )
             // Configure session management
-            .sessionManagement(session -> 
-                session
-                    .maximumSessions(1)
-                    .maxSessionsPreventsLogin(true)
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                      .invalidSessionUrl("/login?expired=true")
+                      .maximumSessions(1)
+                      .maxSessionsPreventsLogin(true)
+                      .expiredUrl("/login?expired=true")
             )
             // Configure security headers
             .headers(headers -> 

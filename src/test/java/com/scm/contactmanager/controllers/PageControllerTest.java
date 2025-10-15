@@ -22,7 +22,7 @@ import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.repositories.UserRepo;
 
 @WebMvcTest(PageController.class)
-@Import(CommonTestConfig.class)
+@Import({CommonTestConfig.class, com.scm.contactmanager.config.TestSecurityConfig.class})
 public class PageControllerTest {
 
     @Autowired
