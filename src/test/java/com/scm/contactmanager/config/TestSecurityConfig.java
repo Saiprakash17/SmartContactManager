@@ -1,215 +1,155 @@
 package com.scm.contactmanager.config;
 
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import java.util.List;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 
-import org.springframework.boot.test.context.TestConfiguration;import org.springframework.boot.test.context.TestConfiguration;
-
-import org.springframework.context.annotation.Bean;import org.springframework.context.annotation.Bean;
-
-import org.springframework.context.annotation.Primary;import org.springframework.context.annotation.Primary;
-
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-
-import org.springframework.security.config.http.SessionCreationPolicy;import org.springframework.security.config.http.SessionCreationPolicy;
-
-import org.springframework.security.core.userdetails.User;import org.springframework.security.core.userdetails.User;
-
-import org.springframework.security.core.userdetails.UserDetailsService;import org.springframework.security.core.userdetails.UserDetailsService;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import org.springframework.security.crypto.password.PasswordEncoder;import org.springframework.security.crypto.password.PasswordEncoder;
-
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
-import org.springframework.security.web.SecurityFilterChain;import org.springframework.security.web.SecurityFilterChain;
-
-
-
-@TestConfigurationimport java.util.ArrayList;
-
+@TestConfiguration
 @EnableWebSecurity
+@EnableMethodSecurity
+@Import(CommonTestConfig.class)
+@org.springframework.context.annotation.Profile("test")
+public class TestSecurityConfig {
 
-@EnableMethodSecurity@TestConfiguration
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
 
-public class TestSecurityConfig {@EnableWebSecurity
+    @Bean
+    public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
+        return new CompositeSessionAuthenticationStrategy(List.of(
+            new SessionFixationProtectionStrategy(),
+            new RegisterSessionAuthenticationStrategy(sessionRegistry())
+        ));
+    }
 
-    private static final String[] PUBLIC_URLS = {@EnableMethodSecurity
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        return authProvider;
+    }
 
-        "/", "/about", "/signup", "/login", "/css/**", "/js/**", "/img/**",public class TestSecurityConfig {
+    private static final String[] PUBLIC_URLS = {
+        "/", "/about", "/signup", "/login", "/css/**", "/js/**", "/img/**",
+        "/home", "/register", "/authenticate", "/h2-console/**", "/user/contacts/decode-qr",
+        "/services", "/contact", "/forgot-password", "/reset-password"
+    };
 
-        "/index", "/register", "/authenticate", "/h2-console/**"    private static final String[] PUBLIC_URLS = {
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
+        handler.setDefaultTargetUrl("/user/dashboard");
+        handler.setTargetUrlParameter("continue");
+        return handler;
+    }
 
-    };        "/", "/about", "/signup", "/login", "/css/**", "/js/**", "/img/**",
-
-            "/index", "/register", "/authenticate", "/h2-console/**"
-
-    @Bean    };
-
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {    
-
-        http.csrf(csrf -> csrf.ignoringRequestMatchers(PUBLIC_URLS))    @Bean
-
-                .authorizeHttpRequests(authorize -> authorize    public static org.springframework.context.support.PropertySourcesPlaceholderConfigurer propertiesResolver() {
-
-                        .requestMatchers(PUBLIC_URLS).permitAll()        return new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
-
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")    }
-
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        .anyRequest().authenticated()    @Bean
-
-                )    @Primary
-
-                .formLogin(form -> form    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-
-                        .loginPage("/login")        return new InMemoryUserDetailsManager(
-
-                        .loginProcessingUrl("/authenticate")            org.springframework.security.core.userdetails.User.builder()
-
-                        .defaultSuccessUrl("/user/index")                .username("test@example.com")
-
-                        .failureUrl("/login?error=true")                .password(passwordEncoder.encode("testpassword"))
-
-                        .permitAll()                .roles("USER")
-
-                )                .build(),
-
-                .logout(logout -> logout            org.springframework.security.core.userdetails.User.builder()
-
-                        .logoutUrl("/logout")                .username("admin@example.com")
-
-                        .logoutSuccessUrl("/login?logout")                .password(passwordEncoder.encode("admin"))
-
-                        .deleteCookies("JSESSIONID")                .roles("USER", "ADMIN")
-
-                        .permitAll()                .build()
-
-                )        );
-
-                .headers(headers -> {    }
-
-                    headers.addHeaderWriter((request, response) -> {
-
-                        response.setHeader("X-Frame-Options", "SAMEORIGIN");    @Bean
-
-                        response.setHeader("X-Content-Type-Options", "nosniff");    @Primary
-
-                        response.setHeader("X-XSS-Protection", "1; mode=block");    public PasswordEncoder passwordEncoder() {
-
-                        response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");        return new BCryptPasswordEncoder();
-
-                        response.setHeader("Content-Security-Policy",     }
-
-                            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';");
-
-                    });    @Bean
-
-                })public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-                .sessionManagement(session -> session    http.csrf(csrf -> csrf.ignoringRequestMatchers(PUBLIC_URLS))
-
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)            .authorizeHttpRequests(authorize -> authorize
-
-                );                    .requestMatchers(PUBLIC_URLS).permitAll()
-
-                    .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-
-        return http.build();                    .requestMatchers("/admin/**").hasRole("ADMIN")
-
-    }                    .anyRequest().authenticated()
-
+    @Bean 
+    public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authenticationProvider,
+                                         AuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
+        http
+            .authenticationProvider(authenticationProvider)
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/css/**", "/js/**", "/img/**", "/user/contacts/decode-qr")
             )
-
-    @Bean            .formLogin(form -> form
-
-    @Primary                    .loginPage("/login")
-
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {                    .loginProcessingUrl("/authenticate")
-
-        return new InMemoryUserDetailsManager(                    .defaultSuccessUrl("/user/index")
-
-            User.builder()                    .failureUrl("/login?error=true")
-
-                .username("test@example.com")                    .permitAll()
-
-                .password(passwordEncoder.encode("testpassword"))            )
-
-                .roles("USER")            .logout(logout -> logout
-
-                .build(),                    .logoutUrl("/logout")
-
-            User.builder()                    .logoutSuccessUrl("/login?logout")
-
-                .username("admin@example.com")                    .deleteCookies("JSESSIONID")
-
-                .password(passwordEncoder.encode("admin"))                    .permitAll()
-
-                .roles("USER", "ADMIN")            )
-
-                .build()            .headers(headers -> {
-
-        );                headers.addHeaderWriter((request, response) -> {
-
-    }                    response.setHeader("X-Frame-Options", "SAMEORIGIN");
-
-                    response.setHeader("X-Content-Type-Options", "nosniff");
-
-    @Bean                    response.setHeader("X-XSS-Protection", "1; mode=block");
-
-    @Primary                    response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-
-    public PasswordEncoder passwordEncoder() {                    response.setHeader("Content-Security-Policy", 
-
-        return new BCryptPasswordEncoder();                        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';");
-
-    }                });
-
-}            })
-            .sessionManagement(session -> session
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(PUBLIC_URLS).permitAll()
+                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .formLogin(formLogin ->
+                formLogin
+                    .loginPage("/login")
+                    .loginProcessingUrl("/authenticate")
+                    .successHandler(authenticationSuccessHandler)
+                    .usernameParameter("email")
+                    .passwordParameter("password")
+                    .failureUrl("/login?error=true")
+                    .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            )
+            .sessionManagement(session -> {
+                session
                     .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            );
-
-    return http.build();
-}
-
-    @Bean
-    @Primary
-    public Cloudinary cloudinary() {
-        return new Cloudinary(
-            ObjectUtils.asMap(
-                "cloud_name", "test_cloud",
-                "api_key", "test_key",
-                "api_secret", "test_secret"
+                    .invalidSessionUrl("/login?expired=true")
+                    .sessionFixation(fix -> fix.newSession())
+                    .sessionAuthenticationStrategy(sessionAuthenticationStrategy())
+                    .maximumSessions(1)
+                    .expiredUrl("/login?expired=true")
+                    .maxSessionsPreventsLogin(false);
+            })
+            .securityContext(context -> context
+                .requireExplicitSave(false)
             )
+            .headers(headers -> 
+                headers.defaultsDisabled()
+                    .xssProtection(Customizer.withDefaults())
+                    .cacheControl(Customizer.withDefaults())
+                    .contentTypeOptions(Customizer.withDefaults())
+                    .frameOptions(frame -> frame.deny())
+                    .httpStrictTransportSecurity(hsts -> hsts
+                        .maxAgeInSeconds(31536000)
+                        .includeSubDomains(true))
+                    .contentSecurityPolicy(csp -> csp
+                        .policyDirectives(
+                            "default-src 'self'; " +
+                            "img-src 'self' data: https: http: blob:; " +
+                            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; " +
+                            "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+                            "connect-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https:; " +
+                            "font-src 'self' data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+                            "worker-src 'self' blob:; " +
+                            "frame-src 'self'; " +
+                            "script-src-elem 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com;"
+                        )
+                    ));
+        
+        return http.build();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        return new InMemoryUserDetailsManager(
+            User.builder()
+                .username("test@example.com")
+                .password(passwordEncoder.encode("testpassword"))
+                .roles("USER")
+                .build(),
+            User.builder()
+                .username("admin@example.com")
+                .password(passwordEncoder.encode("admin"))
+                .roles("USER", "ADMIN")
+                .build()
         );
-    }
-
-    @Bean
-    @Primary
-    public ContactService contactService() {
-        ContactService contactService = mock(ContactService.class);
-        Page<Contact> emptyPage = new PageImpl<>(java.util.Collections.emptyList());
-        when(contactService.getByUser(any(User.class), anyInt(), anyInt(), anyString(), anyString()))
-            .thenReturn(emptyPage);
-        return contactService;
-    }
-
-    @Bean
-    @Primary
-    public UserService userService(PasswordEncoder passwordEncoder) {
-        UserService userService = mock(UserService.class);
-        User testUser = new User();
-        testUser.setEmail("test@example.com");
-        testUser.setName("Test User");
-        testUser.setPassword(passwordEncoder.encode("testpass"));
-        when(userService.getUserByEmail("test@example.com")).thenReturn(testUser);
-        when(userService.getUserByEmail(anyString())).thenReturn(null);
-        return userService;
     }
 }

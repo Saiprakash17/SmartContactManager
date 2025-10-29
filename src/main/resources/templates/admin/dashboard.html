@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: parent(~{::title}, ~{::#content}, ~{::script})}">
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <div id="content" class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Admin Dashboard</h1>
+                <div th:replace="~{message :: message}"></div>
+            </div>
+        </div>
+    </div>
+    <script></script>
+</body>
+</html>
