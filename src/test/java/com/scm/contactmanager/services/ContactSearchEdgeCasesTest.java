@@ -12,17 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import com.scm.contactmanager.BaseIntegrationTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
-
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.repositories.ContactRepo;
+import com.scm.contactmanager.config.CommonTestConfig;
+import com.scm.contactmanager.config.TestSecurityConfig;
 
-@SpringBootTest
+@SpringBootTest(classes = {CommonTestConfig.class})
 @AutoConfigureTestDatabase
+@Import({TestSecurityConfig.class})
 class ContactSearchEdgeCasesTest extends BaseIntegrationTest {
 
     @Autowired

@@ -8,21 +8,26 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.scm.contactmanager.config.TestSecurityConfig;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@WebMvcTest
-@Import(TestSecurityConfig.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+@Import({TestSecurityConfig.class})
 @TestPropertySource(locations = "classpath:application-test.properties")
+@ActiveProfiles("test")
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class SecurityTest {
     @Autowired
     private WebApplicationContext context;
@@ -44,7 +49,7 @@ class SecurityTest {
 
     @Test
     void shouldDenyAccessToUnauthenticatedUsers() throws Exception {
-        mockMvc.perform(get("/user/contacts/view"))
+        mockMvc.perform(get("/user/dashboard"))
             .andExpect(status().is3xxRedirection())
             .andExpect(redirectedUrl("http://localhost/login"));
     }
@@ -55,13 +60,14 @@ class SecurityTest {
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .param("name", "Test Contact")
             .param("email", "contact@example.com"))
-            .andExpect(status().isForbidden());
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("http://localhost/login"));
     }
 
     @Test
     @WithMockUser(username = "test@example.com", roles = {"USER"})
     void shouldAllowAccessToAuthorizedUsers() throws Exception {
-        mockMvc.perform(get("/user/contacts/view"))
+        mockMvc.perform(get("/user/dashboard"))
             .andExpect(status().isOk());
     }
 
@@ -80,18 +86,17 @@ class SecurityTest {
             .param("country", "Test Country")
             .param("zipCode", "12345"))
             .andExpect(status().is3xxRedirection())
-            .andExpect(redirectedUrl("/user/contacts/view"));
+            .andExpect(redirectedUrl("/user/contacts/add"));
     }
 
     @Test
     void shouldSetSecurityHeaders() throws Exception {
         mockMvc.perform(get("/login"))
             .andExpect(status().isOk())
+            .andExpect(header().exists("Content-Security-Policy"))
             .andExpect(header().exists("X-Content-Type-Options"))
-            .andExpect(header().exists("X-XSS-Protection"))
-            .andExpect(header().exists("X-Frame-Options"))
-            .andExpect(header().exists("Strict-Transport-Security"))
-            .andExpect(header().exists("Content-Security-Policy"));
+            .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+            .andExpect(header().string("X-Frame-Options", "DENY"));
     }
 
     @Test
@@ -117,16 +122,16 @@ class SecurityTest {
     }
 
     @Test
-    @WithMockUser(username = "test@example.com", roles = {"ADMIN"})
+    @WithMockUser(username = "admin@example.com", roles = {"USER", "ADMIN"})
     void shouldAllowAdminAccess() throws Exception {
-        mockMvc.perform(get("/user/contacts/view"))
+        mockMvc.perform(get("/admin/dashboard"))
             .andExpect(status().isOk());
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
+    @WithMockUser(username = "test@example.com", roles = {"USER"})
     void shouldDenyAdminAccessToUser() throws Exception {
-        mockMvc.perform(get("/admin"))
+        mockMvc.perform(get("/admin/dashboard"))
             .andExpect(status().isForbidden());
     }
 

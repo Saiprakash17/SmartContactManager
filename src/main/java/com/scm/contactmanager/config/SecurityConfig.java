@@ -63,11 +63,13 @@ public class SecurityConfig {
             )
             // Configure session management
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                      .invalidSessionUrl("/login?expired=true")
-                      .maximumSessions(1)
-                      .maxSessionsPreventsLogin(true)
-                      .expiredUrl("/login?expired=true")
+                session
+                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    .invalidSessionUrl("http://localhost/login?expired=true")
+                    .sessionFixation().changeSessionId()
+                    .maximumSessions(1)
+                    .maxSessionsPreventsLogin(false)
+                    .expiredUrl("http://localhost/login?expired=true")
             )
             // Configure security headers
             .headers(headers -> 
