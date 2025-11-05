@@ -3,28 +3,31 @@ package com.scm.contactmanager.config;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import java.util.List;
+import java.util.Arrays;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
+import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.JstlView;
 
 @TestConfiguration
 @EnableWebSecurity
@@ -32,6 +35,15 @@ import org.springframework.security.web.authentication.session.SessionFixationPr
 @Import(CommonTestConfig.class)
 @org.springframework.context.annotation.Profile("test")
 public class TestSecurityConfig {
+    
+    @Bean
+    public ViewResolver viewResolver() {
+        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+        resolver.setViewClass(JstlView.class);
+        resolver.setPrefix("/templates/");
+        resolver.setSuffix(".html");
+        return resolver;
+    }
 
     @Bean
     public SessionRegistry sessionRegistry() {
@@ -39,18 +51,23 @@ public class TestSecurityConfig {
     }
 
     @Bean
-    public SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-        return new CompositeSessionAuthenticationStrategy(List.of(
-            new SessionFixationProtectionStrategy(),
-            new RegisterSessionAuthenticationStrategy(sessionRegistry())
-        ));
-    }
+    public SessionAuthenticationStrategy sessionAuthenticationStrategy(SessionRegistry sessionRegistry) {
+        ConcurrentSessionControlAuthenticationStrategy concurrentSessionStrategy = 
+            new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry);
+        concurrentSessionStrategy.setMaximumSessions(1);
+        concurrentSessionStrategy.setExceptionIfMaximumExceeded(true);
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder);
-        return authProvider;
+        SessionFixationProtectionStrategy sessionFixationStrategy = new SessionFixationProtectionStrategy();
+        sessionFixationStrategy.setMigrateSessionAttributes(true);
+
+        RegisterSessionAuthenticationStrategy registerSessionStrategy = 
+            new RegisterSessionAuthenticationStrategy(sessionRegistry);
+
+        return new CompositeSessionAuthenticationStrategy(Arrays.asList(
+            concurrentSessionStrategy,
+            sessionFixationStrategy,
+            registerSessionStrategy
+        ));
     }
 
     private static final String[] PUBLIC_URLS = {
@@ -60,56 +77,47 @@ public class TestSecurityConfig {
     };
 
     @Bean
-    public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
-        handler.setDefaultTargetUrl("/user/dashboard");
-        handler.setTargetUrlParameter("continue");
-        return handler;
-    }
-
-    @Bean 
-    public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authenticationProvider,
-                                         AuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         http
-            .authenticationProvider(authenticationProvider)
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/css/**", "/js/**", "/img/**", "/user/contacts/decode-qr")
+                .ignoringRequestMatchers(PUBLIC_URLS)
             )
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(PUBLIC_URLS).permitAll()
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/api/**").hasRole("USER")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-            .formLogin(formLogin ->
-                formLogin
-                    .loginPage("/login")
-                    .loginProcessingUrl("/authenticate")
-                    .successHandler(authenticationSuccessHandler)
-                    .usernameParameter("email")
-                    .passwordParameter("password")
-                    .failureUrl("/login?error=true")
-                    .permitAll()
+            .httpBasic(Customizer.withDefaults())
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/authenticate")
+                .defaultSuccessUrl("/user/dashboard")
+                .failureUrl("/login?error=true")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
-                .permitAll()
             )
-            .sessionManagement(session -> {
-                session
-                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                    .invalidSessionUrl("/login?expired=true")
-                    .sessionFixation(fix -> fix.newSession())
-                    .sessionAuthenticationStrategy(sessionAuthenticationStrategy())
-                    .maximumSessions(1)
-                    .expiredUrl("/login?expired=true")
-                    .maxSessionsPreventsLogin(false);
-            })
-            .securityContext(context -> context
-                .requireExplicitSave(false)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .invalidSessionUrl("/login?expired=true")
+                .sessionFixation().migrateSession()
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(true)
+                .expiredUrl("/login?expired=true")
+                .sessionRegistry(sessionRegistry)
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> 
+                    response.sendRedirect("/login"))
+                .accessDeniedHandler((request, response, accessDeniedException) -> 
+                    response.sendError(403, "Access Denied"))
             )
             .headers(headers -> 
                 headers.defaultsDisabled()
@@ -138,6 +146,7 @@ public class TestSecurityConfig {
     }
 
     @Bean
+    @Primary
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         return new InMemoryUserDetailsManager(
             User.builder()
@@ -147,7 +156,7 @@ public class TestSecurityConfig {
                 .build(),
             User.builder()
                 .username("admin@example.com")
-                .password(passwordEncoder.encode("admin"))
+                .password(passwordEncoder.encode("testpassword"))
                 .roles("USER", "ADMIN")
                 .build()
         );

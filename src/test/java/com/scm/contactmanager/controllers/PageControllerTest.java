@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.context.annotation.Import;
 
 import com.scm.contactmanager.config.CommonTestConfig;
+import com.scm.contactmanager.config.NoSecurityConfig;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.services.EmailService;
 import com.scm.contactmanager.services.PageService;
@@ -22,7 +23,7 @@ import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.repositories.UserRepo;
 
 @WebMvcTest(PageController.class)
-@Import({CommonTestConfig.class, com.scm.contactmanager.config.TestSecurityConfig.class})
+@Import({CommonTestConfig.class, NoSecurityConfig.class})
 public class PageControllerTest {
 
     @Autowired
