@@ -3,6 +3,7 @@ package com.scm.contactmanager.controllers;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import com.scm.contactmanager.services.ApiService;
 
 @WebMvcTest(ApiController.class)
 @Import({CommonTestConfig.class, GlobalExceptionHandler.class, TestSecurityConfig.class, TestApiConfig.class})
+@WithMockUser(username = "test@example.com", password = "testpassword", roles = "USER")
 public class ApiControllerTest {
 
     @Autowired
@@ -49,6 +51,7 @@ public class ApiControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.success").value(true))
+            .andExpect(jsonPath("$.message").value("Contact retrieved successfully"))
             .andExpect(jsonPath("$.data.name").value("Test Contact"))
             .andExpect(jsonPath("$.data.email").value("test@example.com"));
     }
@@ -61,8 +64,8 @@ public class ApiControllerTest {
         mockMvc.perform(get("/api/contact/999"))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.success").value(false))
-            .andExpect(jsonPath("$.error").value("Not found"))
-            .andExpect(jsonPath("$.message").value("Contact not found with id : '999'"));
+            .andExpect(jsonPath("$.message").value("Resource not found"))
+            .andExpect(jsonPath("$.error").value("Contact not found with id : '999'"));
     }
 
     @Test
@@ -73,8 +76,8 @@ public class ApiControllerTest {
         mockMvc.perform(get("/api/contact/invalid"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.success").value(false))
-            .andExpect(jsonPath("$.error").value("Invalid format"))
-            .andExpect(jsonPath("$.message").value("Contact ID must be a valid number"));
+            .andExpect(jsonPath("$.message").value("Invalid input"))
+            .andExpect(jsonPath("$.error").value("Contact ID must be a valid number"));
     }
 
     @Test
@@ -85,7 +88,7 @@ public class ApiControllerTest {
         mockMvc.perform(get("/api/contact/ "))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.success").value(false))
-            .andExpect(jsonPath("$.error").value("Invalid input"))
-            .andExpect(jsonPath("$.message").value("Contact ID cannot be null or empty"));
+            .andExpect(jsonPath("$.message").value("Invalid input"))
+            .andExpect(jsonPath("$.error").value("Contact ID cannot be null or empty"));
     }
 }

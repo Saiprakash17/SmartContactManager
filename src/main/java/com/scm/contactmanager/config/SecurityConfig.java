@@ -66,7 +66,7 @@ public class SecurityConfig {
                 session
                     .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     .invalidSessionUrl("http://localhost/login?expired=true")
-                    .sessionFixation().changeSessionId()
+                    .sessionFixation().newSession()
                     .maximumSessions(1)
                     .maxSessionsPreventsLogin(false)
                     .expiredUrl("http://localhost/login?expired=true")
