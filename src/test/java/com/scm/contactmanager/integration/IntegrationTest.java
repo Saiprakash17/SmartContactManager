@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -17,12 +18,14 @@ import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.services.QRCodeGeneratorService;
+import com.scm.contactmanager.config.CommonTestConfig;
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(CommonTestConfig.class)
 class IntegrationTest {
 
     // 2. Register the GreenMail extension. It will start a server on a random free port.
