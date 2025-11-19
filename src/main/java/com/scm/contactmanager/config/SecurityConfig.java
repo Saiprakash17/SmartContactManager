@@ -1,9 +1,8 @@
 package com.scm.contactmanager.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,22 +17,28 @@ import com.scm.contactmanager.services.impl.SecurityCustomUserDeatilsService;
 @org.springframework.context.annotation.Profile("!test")
 public class SecurityConfig {
 
-    @Autowired
-    private SecurityCustomUserDeatilsService userDetailsService;
+    private final SecurityCustomUserDeatilsService userDetailsService;
+    private final AuthFailtureHandler authFailtureHandler;
 
-    @Autowired
-    private AuthFailtureHandler authFailtureHandler;
+    public SecurityConfig(SecurityCustomUserDeatilsService userDetailsService,
+                         AuthFailtureHandler authFailtureHandler) {
+        this.userDetailsService = userDetailsService;
+        this.authFailtureHandler = authFailtureHandler;
+    }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-            .userDetailsService(userDetailsService)
-            .passwordEncoder(passwordEncoder());
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+            // Configure authentication provider
+            .authenticationProvider(daoAuthenticationProvider())
             // Configure CSRF protection
             .csrf(csrf -> csrf.ignoringRequestMatchers("/css/**", "/js/**", "/img/**", "/user/contacts/decode-qr"))
             // Configure authorization rules
@@ -74,9 +79,6 @@ public class SecurityConfig {
             // Configure security headers
             .headers(headers -> 
                 headers
-                    .xssProtection(xss -> {})
-                    .contentTypeOptions(cto -> {})
-                    .frameOptions(frame -> frame.deny())
                     .httpStrictTransportSecurity(hsts -> 
                         hsts
                             .includeSubDomains(true)
