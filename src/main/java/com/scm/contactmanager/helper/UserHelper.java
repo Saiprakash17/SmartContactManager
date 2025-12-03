@@ -1,10 +1,14 @@
 package com.scm.contactmanager.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 public class UserHelper {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserHelper.class);
 
     public static String getEmailOfLoggedInUser(Authentication authentication) {
         if(authentication instanceof OAuth2AuthenticationToken){
@@ -16,12 +20,12 @@ public class UserHelper {
             String username = "";
 
             if(clientId.equals("google")){
-                System.out.println("Getting email from google");
+                logger.debug("Extracting email from Google OAuth provider");
                 Object emailAttr = oauth2User.getAttribute("email");
                 username = emailAttr != null ? emailAttr.toString() : "";
             }
             else if(clientId.equals("github")){
-                System.out.println("Getting email from github");
+                logger.debug("Extracting email from GitHub OAuth provider");
                 Object emailAttr = oauth2User.getAttribute("email");
                 Object loginAttr = oauth2User.getAttribute("login");
                 if (emailAttr != null) {
@@ -35,7 +39,7 @@ public class UserHelper {
             return username;
         }
         else{
-            System.out.println("Getting email from normal login");
+            logger.debug("Extracting email from normal login");
             return authentication.getName();
         }
     }

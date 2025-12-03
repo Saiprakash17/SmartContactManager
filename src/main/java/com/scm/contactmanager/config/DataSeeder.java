@@ -7,6 +7,8 @@ import com.scm.contactmanager.repositories.UserRepo;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("!test") // This component will not be loaded when the 'test' profile is active
 public class DataSeeder implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataSeeder.class);
 
     @Autowired
 	private UserRepo userRepo;
@@ -38,7 +42,7 @@ public class DataSeeder implements CommandLineRunner {
 
 		userRepo.findByEmail("admin@gmail.com").ifPresentOrElse(user1 -> {},() -> {
 			userRepo.save(user);
-			System.out.println("user created");
+			logger.info("Admin user created successfully");
 		});
     }
 

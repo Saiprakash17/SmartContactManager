@@ -2,6 +2,8 @@ package com.scm.contactmanager.services.impl;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,8 @@ import com.google.zxing.WriterException;
 
 @Service
 public class ImageServiceImpl implements ImageService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
 
     @Autowired
     private Cloudinary cloudinary;
@@ -34,8 +38,7 @@ public class ImageServiceImpl implements ImageService {
 
             return this.getUrlFromPublicId(fileName);
         } catch (IOException e) {
-            System.out.println("Error uploading image: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error uploading image for file: {}", fileName, e);
             return null;
         }
 
