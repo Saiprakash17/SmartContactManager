@@ -40,7 +40,7 @@ public class SecurityConfig {
             // Configure authentication provider
             .authenticationProvider(daoAuthenticationProvider())
             // Configure CSRF protection
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/css/**", "/js/**", "/img/**", "/user/contacts/decode-qr"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/css/**", "/js/**", "/img/**", "/api/**"))
             // Configure authorization rules
             .authorizeHttpRequests(authorize ->
                 authorize

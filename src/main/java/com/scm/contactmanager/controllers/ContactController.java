@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import java.io.IOException;
+import java.util.Set;
 
 import com.scm.contactmanager.entities.Contact;
 import com.scm.contactmanager.entities.User;
@@ -144,6 +145,40 @@ public class ContactController {
                     .type(MessageType.red)
                     .build());
             return "redirect:/user/contacts/view";
+        }
+        
+        // SECURITY: Validate sortBy - whitelist of allowed fields
+        Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "name", "email", "phoneNumber", "address", "about", "favorite", "createdAt", "updatedAt"
+        );
+        
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            logger.warn("Invalid sort field attempted: {}", sortBy);
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("Invalid sort field")
+                    .type(MessageType.red)
+                    .build());
+            return "redirect:/user/contacts/view";
+        }
+        
+        // SECURITY: Validate direction - only asc or desc
+        if (!direction.matches("^(asc|desc)$")) {
+            logger.warn("Invalid sort direction attempted: {}", direction);
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("Invalid sort direction")
+                    .type(MessageType.red)
+                    .build());
+            return "redirect:/user/contacts/view";
+        }
+        
+        // SECURITY: Validate pagination parameters
+        if (page < 0) {
+            page = 0;
+        }
+        if (size < 1 || size > 100) {
+            size = (AppConstants.PAGE_SIZE);
         }
 
         try {
