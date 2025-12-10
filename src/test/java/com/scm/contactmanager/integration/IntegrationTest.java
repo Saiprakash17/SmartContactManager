@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -27,6 +29,8 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 @ActiveProfiles("test")
 @Import(CommonTestConfig.class)
 class IntegrationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTest.class);
 
     // 2. Register the GreenMail extension. It will start a server on a random free port.
     @RegisterExtension
@@ -131,7 +135,7 @@ class IntegrationTest {
     thread2.join();
 
     long count = contactService.getByUser(savedUser, 0, 100, "name", "asc").getTotalElements();
-    System.out.println("Concurrent contacts created: " + count);
+    LOGGER.info("Concurrent contacts created: {}", count);
     assertEquals(20, count);
     }
 
