@@ -11,13 +11,17 @@ import java.util.Set;
 
 public class FileValidator implements ConstraintValidator<ValidFile, MultipartFile>{
 
-    private static final long MAX_FILE_SIZE = 1024 * 1024 * 2; // 2MB
+    // ============ FILE SIZE LIMITS ============
+    private static final long MAX_FILE_SIZE = 1024 * 1024 * 5; // 5MB (increased from 2MB for better UX)
     
-    // Magic numbers (file signatures) for validation
+    // ============ MAGIC NUMBERS (FILE SIGNATURES) FOR VALIDATION ============
     private static final byte[] JPEG_MAGIC = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF};
     private static final byte[] PNG_MAGIC = {(byte) 0x89, 'P', 'N', 'G'};
-    private static final byte[] GIF_MAGIC = {'G', 'I', 'F'};
+    private static final byte[] GIF87_MAGIC = {'G', 'I', 'F', '8', '7', 'a'};
+    private static final byte[] GIF89_MAGIC = {'G', 'I', 'F', '8', '9', 'a'};
+    private static final byte[] PDF_MAGIC = {'P', 'D', 'F'};
     
+    // ============ ALLOWED MIME TYPES ============
     private static final Set<String> ALLOWED_MIME_TYPES = new HashSet<>(Arrays.asList(
         "image/jpeg",
         "image/png",
@@ -82,7 +86,7 @@ public class FileValidator implements ConstraintValidator<ValidFile, MultipartFi
     }
 
     private boolean isValidImageMagicNumber(byte[] bytes, String contentType) {
-        if (bytes.length < 4) {
+        if (bytes.length < 3) {
             return false;
         }
 
@@ -95,17 +99,41 @@ public class FileValidator implements ConstraintValidator<ValidFile, MultipartFi
 
         // Check for PNG
         if ("image/png".equals(contentType)) {
+            if (bytes.length < 4) return false;
             return bytes[0] == PNG_MAGIC[0] && 
                    bytes[1] == PNG_MAGIC[1] && 
                    bytes[2] == PNG_MAGIC[2] && 
                    bytes[3] == PNG_MAGIC[3];
         }
 
-        // Check for GIF
+        // Check for GIF (both GIF87a and GIF89a)
         if ("image/gif".equals(contentType)) {
-            return bytes[0] == GIF_MAGIC[0] && 
-                   bytes[1] == GIF_MAGIC[1] && 
-                   bytes[2] == GIF_MAGIC[2];
+            if (bytes.length < 6) return false;
+            // Check for GIF87a
+            boolean isGif87 = bytes[0] == GIF87_MAGIC[0] && 
+                            bytes[1] == GIF87_MAGIC[1] && 
+                            bytes[2] == GIF87_MAGIC[2] &&
+                            bytes[3] == GIF87_MAGIC[3] &&
+                            bytes[4] == GIF87_MAGIC[4] &&
+                            bytes[5] == GIF87_MAGIC[5];
+            
+            // Check for GIF89a
+            boolean isGif89 = bytes[0] == GIF89_MAGIC[0] && 
+                            bytes[1] == GIF89_MAGIC[1] && 
+                            bytes[2] == GIF89_MAGIC[2] &&
+                            bytes[3] == GIF89_MAGIC[3] &&
+                            bytes[4] == GIF89_MAGIC[4] &&
+                            bytes[5] == GIF89_MAGIC[5];
+            
+            return isGif87 || isGif89;
+        }
+
+        // Check for PDF (application/pdf)
+        if ("application/pdf".equals(contentType)) {
+            if (bytes.length < 4) return false;
+            return bytes[0] == PDF_MAGIC[0] && 
+                   bytes[1] == PDF_MAGIC[1] && 
+                   bytes[2] == PDF_MAGIC[2];
         }
 
         return false;

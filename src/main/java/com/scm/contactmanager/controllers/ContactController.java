@@ -113,6 +113,14 @@ public class ContactController {
         Model model, 
         Authentication authentication
     ) {
+        // SECURITY: Validate pagination parameters
+        if (page < 0) {
+            page = 0;
+        }
+        if (size < 1 || size > 50) {
+            size = AppConstants.PAGE_SIZE;
+        }
+        
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
         Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
@@ -177,8 +185,8 @@ public class ContactController {
         if (page < 0) {
             page = 0;
         }
-        if (size < 1 || size > 100) {
-            size = (AppConstants.PAGE_SIZE);
+        if (size < 1 || size > 50) {
+            size = AppConstants.PAGE_SIZE;
         }
 
         try {
@@ -384,6 +392,14 @@ public class ContactController {
                                        @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
                                        @RequestParam(value = "direction", defaultValue = "asc") String direction,
                                        Model model, Authentication authentication) {
+        // SECURITY: Validate pagination parameters
+        if (page < 0) {
+            page = 0;
+        }
+        if (size < 1 || size > 50) {
+            size = AppConstants.PAGE_SIZE;
+        }
+        
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
         Page<Contact> contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);

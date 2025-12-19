@@ -1,7 +1,7 @@
 <aside th:fragment="sidebar" id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
     <div class="h-full pt-8 px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
        <a th:href="@{/user/profile}" class="flex flex-col items-center ps-2.5 mb-5">
-          <img onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'" th:src="@{${loggedInUser.imageUrl}}" class="h-16 me-3 sm:h-24 rounded-full" alt="Flowbite Logo" />
+          <img th:src="@{${loggedInUser.imageUrl}}" class="h-16 me-3 sm:h-24 rounded-full" alt="User avatar" data-fallback-img="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg" />
           <span class="self-center text-xl text-gray-900 font-semibold whitespace-nowrap dark:text-white">Welcome <span th:text="${loggedInUser.name}"></span></span>
        </a>
        <ul class="space-y-2 font-medium">
