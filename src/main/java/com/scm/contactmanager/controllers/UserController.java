@@ -17,8 +17,10 @@ import com.scm.contactmanager.forms.ProfileForm;
 import com.scm.contactmanager.helper.Message;
 import com.scm.contactmanager.helper.MessageType;
 import com.scm.contactmanager.services.UserDashboardService;
+import com.scm.contactmanager.security.SecurityAuditLogger;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 
@@ -30,6 +32,9 @@ public class UserController {
 
     @Autowired
     private UserDashboardService userDashboardService;
+
+    @Autowired(required = false)
+    private SecurityAuditLogger auditLogger;
 
     //dashboard
     @RequestMapping(value = "/dashboard", method = RequestMethod.GET)
@@ -116,6 +121,16 @@ public class UserController {
 
         Message message = userDashboardService.changePassword(changePasswordForm, user, bindingResult);
         session.setAttribute("message", message);
+
+        if (message.getType() == MessageType.green) {
+            if (auditLogger != null) {
+                auditLogger.logPasswordChange(user.getUsername());
+            }
+        } else {
+            if (auditLogger != null) {
+                auditLogger.logFailedLogin(user.getUsername(), "Password change failed: " + message.getContent());
+            }
+        }
 
         if (message.getType() == MessageType.red) {
             model.addAttribute("profileForm", userDashboardService.getProfileForm(user));

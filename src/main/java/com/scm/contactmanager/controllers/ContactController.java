@@ -32,6 +32,7 @@ import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.security.SecurityAuditLogger;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -53,6 +54,9 @@ public class ContactController {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired(required = false)
+    private SecurityAuditLogger auditLogger;
     
     @RequestMapping("/add")
     public String addContactView(Model model) {
@@ -280,6 +284,18 @@ public class ContactController {
                     try {
                         String picture = imageService.uploadImage(file, "contact_" + contactIdLong);
                         contactForm.setPicture(picture);
+                        // Log the file upload
+                        if (auditLogger != null) {
+                            User currentUser = (User) model.getAttribute("loggedInUser");
+                            if (currentUser != null) {
+                                auditLogger.logFileUpload(
+                                    currentUser.getUsername(),
+                                    file.getOriginalFilename(),
+                                    file.getSize(),
+                                    file.getContentType()
+                                );
+                            }
+                        }
                     } catch (Exception e) {
                         logger.error("Error uploading image", e);
                         // Continue with contact update even if image upload fails
