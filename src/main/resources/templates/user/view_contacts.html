@@ -42,7 +42,7 @@
                             </div>
                         </form>
                         <div>
-                            <button type="button" onclick="exportData()" class="space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">Export to CSV</button>
+                            <button type="button" class="export-btn space-x-3 px-2 py-1.5 text-white bg-gray-800 hover:bg-gray-900 rounded-lg">Export to CSV</button>
                         </div>
                     </div>
                     <table class="text-center w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -50,7 +50,7 @@
                             <tr>
                                 <th scope="col" class="p-4">
                                     <div class="flex items-center">
-                                        <input id="checkbox-all" type="checkbox" onclick="selectall()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                        <input id="checkbox-all" type="checkbox" class="checkbox-all w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                         <label for="checkbox-all" class="sr-only">checkbox</label>
                                     </div>
                                 </th>
@@ -72,7 +72,7 @@
                                     </div>
                                 </td>
                                 <td scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white">
-                                    <img onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'" class="w-10 h-10 rounded-full" th:src="@{*{imageUrl}}" alt="Contact image">
+                                    <img class="w-10 h-10 rounded-full" th:src="@{*{imageUrl}}" alt="Contact image" data-fallback-img="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg">
                                     <div class="ps-4">
                                         <div class="text-base font-semibold" th:text="*{name}"></div>
                                         <div class="font-normal text-gray-500" th:text="*{email}"></div>
@@ -92,20 +92,20 @@
                                 <td class="px-6 py-4" th:text="*{relationship != null} ? *{relationship.label} : '-'">-</td>
                                 <td class="px-6 py-4">
                                     <!-- viewcontact -->
-                                    <button class="p-3 view-contact-btn" th:data-id="${c.id}" onclick="loadContactdata(this.getAttribute('data-id'))">
+                                    <button class="p-3 view-contact-btn" th:data-contact-id="${c.id}">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
                                     <!-- update contact -->
                                     <a th:href="@{'/user/contacts/edit/'+*{id}}"><i class="fa-solid w-6 h-6 fa-pen"></i></a>
                                     <!-- delete contact -->
-                                    <button class="delete-contact-btn" th:data-id="${c.id}" onclick="deleteContact(this.getAttribute('data-id'))">
+                                    <button class="delete-contact-btn" th:data-contact-id="${c.id}">
                                         <i class="fa-solid w-6 h-6 fa-trash"></i>
                                     </button>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <button type="button" th:id="'show-qr-btn-' + ${c.id}" th:onclick="'showQRModal(' + ${c.id} + ', \'' + @{/user/contacts/qrcode/{id}(id=${c.id})} + '\')'" class="text-xs text-gray-600 bg-gray-200 rounded px-2 py-1 mr-2 hover:bg-gray-300"><i class="fa-solid fa-qrcode"></i> Show QR</button>
-                                    <button type="button" th:onclick="'downloadQR(' + ${c.id} + ', \'' + @{/user/contacts/qrcode/{id}(id=${c.id})} + '\')'" class="text-xs text-blue-600">Download</button>
-                                    <button type="button" th:onclick="'shareQR(' + ${c.id} + ', \'' + @{/user/contacts/qrcode/{id}(id=${c.id})} + '\')'" class="text-xs text-green-600">Share</button>
+                                    <button type="button" th:id="'show-qr-btn-' + ${c.id}" th:data-contact-id="${c.id}" th:data-qr-url="@{/user/contacts/qrcode/{id}(id=${c.id})}" class="show-qr-btn text-xs text-gray-600 bg-gray-200 rounded px-2 py-1 mr-2 hover:bg-gray-300"><i class="fa-solid fa-qrcode"></i> Show QR</button>
+                                    <button type="button" th:data-contact-id="${c.id}" th:data-qr-url="@{/user/contacts/qrcode/{id}(id=${c.id})}" class="download-qr-btn text-xs text-blue-600">Download</button>
+                                    <button type="button" th:data-contact-id="${c.id}" th:data-qr-url="@{/user/contacts/qrcode/{id}(id=${c.id})}" class="share-qr-btn text-xs text-green-600">Share</button>
                                 </td>
                                 <td style="display: none;">
                                     <span th:text="${c.address != null} ? (*{address.street} + ', ' + *{address.city} + ', ' + *{address.state} + ', ' + *{address.country} + ', ' + *{address.zipCode}) : '-'"></span>

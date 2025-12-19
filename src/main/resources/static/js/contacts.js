@@ -30,6 +30,87 @@ const instanceOptions = {
 
 const contactModal = new Modal(viewContactModal, options, instanceOptions);
 
+// ============ Event Listeners for data attributes ============
+
+// Export button listener
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('export-btn')) {
+    const isFavorite = window.location.pathname.includes('favorites');
+    exportData(isFavorite);
+  }
+});
+
+// Select all checkbox listener
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('checkbox-all')) {
+    selectall();
+  }
+});
+
+// View contact button listener
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.view-contact-btn')) {
+    const button = e.target.closest('.view-contact-btn');
+    const contactId = button.getAttribute('data-contact-id');
+    loadContactdata(contactId);
+  }
+});
+
+// Delete contact button listener
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.delete-contact-btn')) {
+    const button = e.target.closest('.delete-contact-btn');
+    const contactId = button.getAttribute('data-contact-id');
+    deleteContact(contactId);
+  }
+});
+
+// Show QR modal button listener
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.show-qr-btn')) {
+    const button = e.target.closest('.show-qr-btn');
+    const contactId = button.getAttribute('data-contact-id');
+    const qrUrl = button.getAttribute('data-qr-url');
+    showQRModal(contactId, qrUrl);
+  }
+});
+
+// Download QR button listener
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.download-qr-btn')) {
+    const button = e.target.closest('.download-qr-btn');
+    const contactId = button.getAttribute('data-contact-id');
+    const qrUrl = button.getAttribute('data-qr-url');
+    downloadQR(contactId, qrUrl);
+  }
+});
+
+// Share QR button listener
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.share-qr-btn')) {
+    const button = e.target.closest('.share-qr-btn');
+    const contactId = button.getAttribute('data-contact-id');
+    const qrUrl = button.getAttribute('data-qr-url');
+    shareQR(contactId, qrUrl);
+  }
+});
+
+// Close contact modal button listener
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.close-contact-modal-btn')) {
+    closeContactModal();
+  }
+});
+
+// Image fallback handler for all images with data-fallback-img attribute
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG' && e.target.hasAttribute('data-fallback-img')) {
+    e.target.src = e.target.getAttribute('data-fallback-img');
+  }
+}, true);
+
+// ============ Original functions (preserved) ============
+
 function openContactModal() {
   contactModal.show();
 }

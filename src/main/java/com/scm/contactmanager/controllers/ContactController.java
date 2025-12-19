@@ -32,6 +32,7 @@ import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.security.SecurityAuditLogger;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -53,6 +54,9 @@ public class ContactController {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired(required = false)
+    private SecurityAuditLogger auditLogger;
     
     @RequestMapping("/add")
     public String addContactView(Model model) {
@@ -113,6 +117,14 @@ public class ContactController {
         Model model, 
         Authentication authentication
     ) {
+        // SECURITY: Validate pagination parameters
+        if (page < 0) {
+            page = 0;
+        }
+        if (size < 1 || size > 50) {
+            size = AppConstants.PAGE_SIZE;
+        }
+        
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
         Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
@@ -177,8 +189,8 @@ public class ContactController {
         if (page < 0) {
             page = 0;
         }
-        if (size < 1 || size > 100) {
-            size = (AppConstants.PAGE_SIZE);
+        if (size < 1 || size > 50) {
+            size = AppConstants.PAGE_SIZE;
         }
 
         try {
@@ -272,6 +284,18 @@ public class ContactController {
                     try {
                         String picture = imageService.uploadImage(file, "contact_" + contactIdLong);
                         contactForm.setPicture(picture);
+                        // Log the file upload
+                        if (auditLogger != null) {
+                            User currentUser = (User) model.getAttribute("loggedInUser");
+                            if (currentUser != null) {
+                                auditLogger.logFileUpload(
+                                    currentUser.getUsername(),
+                                    file.getOriginalFilename(),
+                                    file.getSize(),
+                                    file.getContentType()
+                                );
+                            }
+                        }
                     } catch (Exception e) {
                         logger.error("Error uploading image", e);
                         // Continue with contact update even if image upload fails
@@ -384,6 +408,14 @@ public class ContactController {
                                        @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
                                        @RequestParam(value = "direction", defaultValue = "asc") String direction,
                                        Model model, Authentication authentication) {
+        // SECURITY: Validate pagination parameters
+        if (page < 0) {
+            page = 0;
+        }
+        if (size < 1 || size > 50) {
+            size = AppConstants.PAGE_SIZE;
+        }
+        
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
         User user = userService.getUserByEmail(username);
         Page<Contact> contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
