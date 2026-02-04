@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,6 +67,22 @@ public class GlobalExceptionHandler {
         logger.error("Constraint violation: {}", ex.getMessage());
         return ResponseEntity.badRequest()
             .body(ApiResponse.error("Invalid input", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException ex) {
+        logger.error("Authentication failed: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(ApiResponse.error("Authentication failed", "Invalid credentials"));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ApiResponse<?>> handleBadCredentialsException(BadCredentialsException ex) {
+        logger.error("Bad credentials: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(ApiResponse.error("Invalid credentials", "Email or password is incorrect"));
     }
 
     @ExceptionHandler(Exception.class)

@@ -58,7 +58,7 @@ public class Contact {
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Default
     private List<SocialLink> socialLinks = new ArrayList<>();
 

@@ -252,7 +252,6 @@ public class ContactController {
             BindingResult result,
             Model model,
             Authentication authentication,
-            org.springframework.web.multipart.MultipartHttpServletRequest multipartRequest,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
 
         Long contactIdLong = Long.parseLong(contactId);
@@ -278,28 +277,25 @@ public class ContactController {
             }
 
             // Handle file upload if present
-            if (multipartRequest != null) {
-                org.springframework.web.multipart.MultipartFile file = multipartRequest.getFile("contactImage");
-                if (file != null && !file.isEmpty()) {
-                    try {
-                        String picture = imageService.uploadImage(file, "contact_" + contactIdLong);
-                        contactForm.setPicture(picture);
-                        // Log the file upload
-                        if (auditLogger != null) {
-                            User currentUser = (User) model.getAttribute("loggedInUser");
-                            if (currentUser != null) {
-                                auditLogger.logFileUpload(
-                                    currentUser.getUsername(),
-                                    file.getOriginalFilename(),
-                                    file.getSize(),
-                                    file.getContentType()
-                                );
-                            }
+            if (contactForm.getContactImage() != null && !contactForm.getContactImage().isEmpty()) {
+                try {
+                    String picture = imageService.uploadImage(contactForm.getContactImage(), "contact_" + contactIdLong);
+                    contactForm.setPicture(picture);
+                    // Log the file upload
+                    if (auditLogger != null) {
+                        User currentUser = (User) model.getAttribute("loggedInUser");
+                        if (currentUser != null) {
+                            auditLogger.logFileUpload(
+                                currentUser.getUsername(),
+                                contactForm.getContactImage().getOriginalFilename(),
+                                contactForm.getContactImage().getSize(),
+                                contactForm.getContactImage().getContentType()
+                            );
                         }
-                    } catch (Exception e) {
-                        logger.error("Error uploading image", e);
-                        // Continue with contact update even if image upload fails
                     }
+                } catch (Exception e) {
+                    logger.error("Error uploading image", e);
+                    // Continue with contact update even if image upload fails
                 }
             }
 
