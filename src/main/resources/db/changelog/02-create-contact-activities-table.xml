@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create contact_activities table -->
+    <changeSet id="create-contact-activities-table" author="dev">
+        <createTable tableName="contact_activities">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="contact_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_activity_contact" references="contact(id)"/>
+            </column>
+            <column name="user_id" type="VARCHAR(100)">
+                <constraints nullable="false" foreignKeyName="fk_activity_user" references="users(id)"/>
+            </column>
+            <column name="activity_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="timestamp" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="ip_address" type="VARCHAR(45)"/>
+            <column name="user_agent" type="TEXT"/>
+        </createTable>
+        <createIndex tableName="contact_activities" indexName="idx_contact_timestamp">
+            <column name="contact_id"/>
+            <column name="timestamp"/>
+        </createIndex>
+        <createIndex tableName="contact_activities" indexName="idx_user_timestamp">
+            <column name="user_id"/>
+            <column name="timestamp"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

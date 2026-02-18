@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create contact_tags table -->
+    <changeSet id="create-contact-tags-table" author="dev">
+        <createTable tableName="contact_tags">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="color" type="VARCHAR(7)"/>
+            <column name="description" type="TEXT"/>
+            <column name="user_id" type="VARCHAR(100)">
+                <constraints nullable="false" foreignKeyName="fk_tags_user" references="users(id)"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <createIndex tableName="contact_tags" indexName="idx_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Create junction table for contacts and tags -->
+    <changeSet id="create-contact-contact-tag-table" author="dev">
+        <createTable tableName="contact_contact_tag">
+            <column name="contact_id" type="BIGINT">
+                <constraints primaryKey="true" foreignKeyName="fk_cct_contact" references="contact(id)"/>
+            </column>
+            <column name="tag_id" type="BIGINT">
+                <constraints primaryKey="true" foreignKeyName="fk_cct_tag" references="contact_tags(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

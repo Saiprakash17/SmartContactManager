@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create important_dates table -->
+    <changeSet id="create-important-dates-table" author="dev">
+        <createTable tableName="important_dates">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="contact_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_date_contact" references="contact(id)"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_enabled" type="BIT" defaultValue="1"/>
+            <column name="days_before_notify" type="INT" defaultValue="7"/>
+            <column name="last_notified" type="TIMESTAMP"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <createIndex tableName="important_dates" indexName="idx_date_upcoming">
+            <column name="date"/>
+            <column name="notification_enabled"/>
+        </createIndex>
+        <createIndex tableName="important_dates" indexName="idx_contact_id">
+            <column name="contact_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
