@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ import com.scm.contactmanager.entities.User;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ContactRepo extends JpaRepository<Contact, Long> {
+public interface ContactRepo extends JpaRepository<Contact, Long>, JpaSpecificationExecutor<Contact> {
 
     // Find the contact by user with entity graph to prevent N+1 queries
     @EntityGraph(attributePaths = {"socialLinks", "address"})
@@ -84,4 +85,16 @@ public interface ContactRepo extends JpaRepository<Contact, Long> {
     // Get all contacts for user
     @EntityGraph(attributePaths = {"socialLinks", "address"})
     List<Contact> findAllByUser(User user);
+
+    // Find contacts by tag ID
+    @EntityGraph(attributePaths = {"socialLinks", "address", "tags"})
+    Page<Contact> findByTags_Id(Long tagId, Pageable pageable);
+
+    // Find contacts by IDs and user (for bulk operations)
+    @EntityGraph(attributePaths = {"socialLinks", "address", "tags"})
+    List<Contact> findByIdInAndUser(List<Long> ids, User user);
+
+    // Find contacts by IDs
+    @EntityGraph(attributePaths = {"socialLinks", "address", "tags"})
+    List<Contact> findByIdIn(List<Long> ids);
 }

@@ -1,7 +1,9 @@
 package com.scm.contactmanager.entities;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -12,6 +14,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -57,6 +61,15 @@ public class Contact {
     @ManyToOne
     @JsonIgnore
     private User user;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "contact_contact_tag",
+        joinColumns = @JoinColumn(name = "contact_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    @Default
+    private Set<ContactTag> tags = new HashSet<>();
 
     @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Default
