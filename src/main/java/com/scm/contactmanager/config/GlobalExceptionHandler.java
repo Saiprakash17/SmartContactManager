@@ -17,8 +17,6 @@ import jakarta.validation.ConstraintViolationException;
 import com.scm.contactmanager.helper.ResourceNotFoundException;
 import com.scm.contactmanager.payloads.ApiResponse;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

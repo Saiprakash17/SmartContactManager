@@ -44,9 +44,11 @@ public class ImportantDate {
     private LocalDate date;
 
     @Column(columnDefinition = "BIT(1) DEFAULT 1")
+    @Builder.Default
     private Boolean notificationEnabled = true;
 
     @Column
+    @Builder.Default
     private Integer daysBeforeNotify = 7;
 
     @Column

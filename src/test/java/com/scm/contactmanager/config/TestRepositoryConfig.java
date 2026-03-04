@@ -14,8 +14,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.util.Properties;
 
-import com.scm.contactmanager.repositories.ContactRepo;
-import com.scm.contactmanager.repositories.UserRepo;
 
 @TestConfiguration
 @EnableJpaRepositories(basePackages = "com.scm.contactmanager.repositories")

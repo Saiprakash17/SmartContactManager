@@ -40,8 +40,11 @@ import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.ImageService;
 import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.services.UserService;
+import com.scm.contactmanager.config.CommonTestConfig;
+import org.springframework.context.annotation.Import;
 
 @WebMvcTest(ContactController.class)
+@Import(CommonTestConfig.class)
 public class ContactControllerTest {
 
     @Autowired

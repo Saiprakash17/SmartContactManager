@@ -1,6 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,8 +27,11 @@ import jakarta.validation.Valid;
 @SecurityRequirement(name = "bearerAuth")
 public class AdvancedSearchController {
 
-    @Autowired
-    private AdvancedSearchService advancedSearchService;
+    private final AdvancedSearchService advancedSearchService;
+
+    public AdvancedSearchController(AdvancedSearchService advancedSearchService) {
+        this.advancedSearchService = advancedSearchService;
+    }
 
     @PostMapping("/advanced")
     @Operation(summary = "Advanced search", description = "Search contacts with multiple criteria filters")

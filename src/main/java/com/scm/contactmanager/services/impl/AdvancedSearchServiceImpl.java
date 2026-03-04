@@ -1,6 +1,5 @@
 package com.scm.contactmanager.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +19,13 @@ import com.scm.contactmanager.services.AdvancedSearchService;
 @Transactional(readOnly = true)
 public class AdvancedSearchServiceImpl implements AdvancedSearchService {
 
-    @Autowired
-    private ContactRepo contactRepository;
+    private final ContactRepo contactRepository;
+    private final ContactSpecification contactSpecification;
 
-    @Autowired
-    private ContactSpecification contactSpecification;
+    public AdvancedSearchServiceImpl(ContactRepo contactRepository, ContactSpecification contactSpecification) {
+        this.contactRepository = contactRepository;
+        this.contactSpecification = contactSpecification;
+    }
 
     @Override
     public Page<Contact> search(AdvancedSearchCriteria criteria, User user) {

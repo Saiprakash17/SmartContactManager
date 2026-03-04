@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +21,16 @@ import com.scm.contactmanager.services.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EmailService emailService;
-    
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, EmailService emailService) {
+        this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+    }
 
     @Override
     public User saveUser(User user) {
@@ -91,14 +91,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isUserPresent(String id) {
-        User newUser = userRepo.findById(id).orElse(null);
-        return newUser != null;
+        return userRepo.findById(id).isPresent();
     }
 
     @Override
     public boolean isUserPresentByEmail(String email) {
-        User user = userRepo.findByEmail(email).orElse(null);
-        return user != null;
+        return userRepo.findByEmail(email).isPresent();
     }
 
     @Override
@@ -113,9 +111,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Nullable
     public User getUserByEmailAndVerifyToken(String email,String token) {
-        User user = userRepo.findByEmailAndVerifyToken(email, token).orElse(null);
-        return user;
+        return userRepo.findByEmailAndVerifyToken(email, token).orElse(null);
     }
 
     @Override

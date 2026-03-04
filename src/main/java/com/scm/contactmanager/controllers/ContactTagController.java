@@ -2,7 +2,6 @@ package com.scm.contactmanager.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +36,11 @@ import jakarta.validation.constraints.NotBlank;
 @SecurityRequirement(name = "bearerAuth")
 public class ContactTagController {
 
-    @Autowired
-    private ContactTagService tagService;
+    private final ContactTagService tagService;
+
+    public ContactTagController(ContactTagService tagService) {
+        this.tagService = tagService;
+    }
 
     @PostMapping
     @Operation(summary = "Create a new tag", description = "Create a new contact tag")

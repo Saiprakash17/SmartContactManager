@@ -1,6 +1,5 @@
 package com.scm.contactmanager.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
@@ -22,14 +21,15 @@ import java.util.Optional;
 @Service
 public class PageServiceImpl implements PageService {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final EmailService emailService;
+    private final PasswordResetTokenService passwordResetTokenService;
 
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private PasswordResetTokenService passwordResetTokenService;
+    public PageServiceImpl(UserService userService, EmailService emailService, PasswordResetTokenService passwordResetTokenService) {
+        this.userService = userService;
+        this.emailService = emailService;
+        this.passwordResetTokenService = passwordResetTokenService;
+    }
 
     @Override
     public Message registerUser(UserForm userForm, BindingResult bindingResult) {

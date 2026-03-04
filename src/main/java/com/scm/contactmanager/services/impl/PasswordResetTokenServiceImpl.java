@@ -4,7 +4,6 @@ import com.scm.contactmanager.entities.PasswordResetToken;
 import com.scm.contactmanager.entities.User;
 import com.scm.contactmanager.repositories.PasswordResetTokenRepo;
 import com.scm.contactmanager.services.PasswordResetTokenService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,8 +15,11 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
 
     private static final int EXPIRATION_MINUTES = 30;
 
-    @Autowired
-    private PasswordResetTokenRepo tokenRepo;
+    private final PasswordResetTokenRepo tokenRepo;
+
+    public PasswordResetTokenServiceImpl(PasswordResetTokenRepo tokenRepo) {
+        this.tokenRepo = tokenRepo;
+    }
 
     @Override
     public PasswordResetToken createTokenForUser(User user) {

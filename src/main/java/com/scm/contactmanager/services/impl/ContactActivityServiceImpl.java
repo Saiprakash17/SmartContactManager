@@ -3,7 +3,6 @@ package com.scm.contactmanager.services.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,13 +14,17 @@ import com.scm.contactmanager.repositories.ContactActivityRepo;
 import com.scm.contactmanager.services.ContactActivityService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.lang.Nullable;
 
 @Service
 @Transactional
 public class ContactActivityServiceImpl implements ContactActivityService {
 
-    @Autowired
-    private ContactActivityRepo activityRepository;
+    private final ContactActivityRepo activityRepository;
+
+    public ContactActivityServiceImpl(ContactActivityRepo activityRepository) {
+        this.activityRepository = activityRepository;
+    }
 
     @Override
     public void logActivity(Contact contact, User user, ActivityType type,
@@ -53,7 +56,7 @@ public class ContactActivityServiceImpl implements ContactActivityService {
         return activityRepository.findByUserAndTimestampAfter(user, startDate);
     }
 
-    private String getClientIp(HttpServletRequest request) {
+    private @Nullable String getClientIp(HttpServletRequest request) {
         if (request == null) {
             return null;
         }

@@ -2,7 +2,6 @@ package com.scm.contactmanager.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.scm.contactmanager.entities.Contact;
@@ -14,12 +13,18 @@ public class ApiServiceImpl implements ApiService {
     
     private static final Logger logger = LoggerFactory.getLogger(ApiServiceImpl.class);
     
-    @Autowired
-    private ContactService contactService;
+    private final ContactService contactService;
+
+    public ApiServiceImpl(ContactService contactService) {
+        this.contactService = contactService;
+    }
     
     @Override
     public Contact getContact(String id) {
         logger.info("Fetching contact with id: {}", id);
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("Contact ID cannot be null or empty");
+        }
         Long contactId = validateAndParseContactId(id);
         Contact contact = contactService.getContactById(contactId);
         
@@ -39,6 +44,9 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public Contact toggleFavorite(String id) {
         logger.info("Toggling favorite status for contact with id: {}", id);
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("Contact ID cannot be null or empty");
+        }
         Long contactId = validateAndParseContactId(id);
         Contact contact = contactService.getContactById(contactId);
         
@@ -47,7 +55,11 @@ public class ApiServiceImpl implements ApiService {
         }
         
         contact.setFavorite(!contact.isFavorite());
-        return contactService.updateContact(contact);
+        Contact updatedContact = contactService.updateContact(contact);
+        if (updatedContact == null) {
+            throw new RuntimeException("Failed to update contact favorite status");
+        }
+        return updatedContact;
     }
     
     @Override

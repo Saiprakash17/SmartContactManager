@@ -1,6 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
@@ -23,8 +22,11 @@ import jakarta.validation.constraints.NotBlank;
 @SecurityRequirement(name = "bearerAuth")
 public class ApiController {
 
-    @Autowired
-    private ApiService apiService;
+    private final ApiService apiService;
+
+    public ApiController(ApiService apiService) {
+        this.apiService = apiService;
+    }
 
     @GetMapping("/contact/{id}")
     @Operation(summary = "Get contact by ID", description = "Retrieve a single contact by its unique identifier")

@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,11 +22,13 @@ public class UserDashboardServiceImpl implements UserDashboardService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserDashboardServiceImpl.class);
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final ImageService imageService;
 
-    @Autowired
-    private ImageService imageService;
+    public UserDashboardServiceImpl(UserService userService, ImageService imageService) {
+        this.userService = userService;
+        this.imageService = imageService;
+    }
 
     @Override
     public ProfileForm getProfileForm(User user) {

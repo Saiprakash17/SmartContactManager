@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.scm.contactmanager.security.SecurityAuditLogger;
+import com.scm.contactmanager.security.RateLimiter;
 
 import static org.mockito.Mockito.mock;
 
@@ -24,5 +26,16 @@ public class CommonTestConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    @Primary
+    public SecurityAuditLogger securityAuditLogger() {
+        return mock(SecurityAuditLogger.class);
+    }
+
+    @Bean
+    @Primary
+    public RateLimiter rateLimiter() {
+        return mock(RateLimiter.class);
+    }
 
 }

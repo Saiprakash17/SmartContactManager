@@ -1,6 +1,5 @@
 package com.scm.contactmanager.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,23 +10,26 @@ import com.scm.contactmanager.services.EmailService;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
-    private JavaMailSender eMailSender;
+    private final JavaMailSender eMailSender;
+    private final String activeProfile;
+    private final String domainName;
+    private final String feedbackToEmail;
+    private final String feedbackFromEmail;
+    private final String fromEmail;
 
-    @Value("${spring.profiles.active:test}")
-    private String activeProfile;
-
-    @Value("${spring.mail.properties.domain_name}")
-    private String domainName;
-
-    @Value("${spring.mail.properties.feedback_to_email}")
-    private String feedbackToEmail;
-
-    @Value("${spring.mail.properties.feedback_from_email}")
-    private String feedbackFromEmail;
-
-    @Value("${spring.mail.properties.from_email}")
-    private String fromEmail;
+    public EmailServiceImpl(JavaMailSender eMailSender,
+            @Value("${spring.profiles.active:test}") String activeProfile,
+            @Value("${spring.mail.properties.domain_name}") String domainName,
+            @Value("${spring.mail.properties.feedback_to_email}") String feedbackToEmail,
+            @Value("${spring.mail.properties.feedback_from_email}") String feedbackFromEmail,
+            @Value("${spring.mail.properties.from_email}") String fromEmail) {
+        this.eMailSender = eMailSender;
+        this.activeProfile = activeProfile;
+        this.domainName = domainName;
+        this.feedbackToEmail = feedbackToEmail;
+        this.feedbackFromEmail = feedbackFromEmail;
+        this.fromEmail = fromEmail;
+    }
 
     @Override
     public void sendEmail(String to, String subject, String body) {

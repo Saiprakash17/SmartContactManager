@@ -21,13 +21,14 @@ import com.scm.contactmanager.services.ContactService;
 import com.scm.contactmanager.services.UserService;
 import com.scm.contactmanager.services.QRCodeGeneratorService;
 import com.scm.contactmanager.config.CommonTestConfig;
+import com.scm.contactmanager.config.TestSecurityConfig;
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(CommonTestConfig.class)
+@Import({TestSecurityConfig.class, CommonTestConfig.class})
 class IntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTest.class);

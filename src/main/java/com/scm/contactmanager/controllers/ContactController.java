@@ -1,7 +1,6 @@
 package com.scm.contactmanager.controllers;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -43,20 +42,21 @@ public class ContactController {
     // --- Declarations ---
     Logger logger = org.slf4j.LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
-    private ContactService contactService;
+    private final ContactService contactService;
+    private final UserService userService;
+    private final QRCodeGeneratorService qrCodeGeneratorService;
+    private final ImageService imageService;
+    private final SecurityAuditLogger auditLogger;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private QRCodeGeneratorService qrCodeGeneratorService;
-
-    @Autowired
-    private ImageService imageService;
-
-    @Autowired(required = false)
-    private SecurityAuditLogger auditLogger;
+    public ContactController(ContactService contactService, UserService userService,
+            QRCodeGeneratorService qrCodeGeneratorService, ImageService imageService,
+            SecurityAuditLogger auditLogger) {
+        this.contactService = contactService;
+        this.userService = userService;
+        this.qrCodeGeneratorService = qrCodeGeneratorService;
+        this.imageService = imageService;
+        this.auditLogger = auditLogger;
+    }
     
     @RequestMapping("/add")
     public String addContactView(Model model) {
@@ -126,7 +126,15 @@ public class ContactController {
         }
         
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
+        if (username == null || username.isEmpty()) {
+            logger.error("Failed to extract username from authentication");
+            return "redirect:/login";
+        }
         User user = userService.getUserByEmail(username);
+        if(user == null) {
+            logger.error("User not found for username: {}", username);
+            return "redirect:/login";
+        }
         Page<Contact> contactsPage = contactService.getByUser(user, page, size, sortBy, direction);
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
@@ -146,7 +154,24 @@ public class ContactController {
         Authentication authentication,
         org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes
     ) {
-        User user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
+        String email = UserHelper.getEmailOfLoggedInUser(authentication);
+        if (email == null || email.isEmpty()) {
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("User authentication failed")
+                    .type(MessageType.red)
+                    .build());
+            return "redirect:/login";
+        }
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("message",
+                Message.builder()
+                    .content("User not found")
+                    .type(MessageType.red)
+                    .build());
+            return "redirect:/login";
+        }
         
         // Validate search parameters
         if (contactSearchForm.getField() == null || contactSearchForm.getField().isEmpty() ||
@@ -347,7 +372,24 @@ public class ContactController {
             Authentication authentication,
             HttpSession session
     ) {
-    User user = userService.getUserByEmail(UserHelper.getEmailOfLoggedInUser(authentication));
+    String email = UserHelper.getEmailOfLoggedInUser(authentication);
+    if (email == null || email.isEmpty()) {
+        session.setAttribute("message",
+                Message.builder()
+                        .content("User authentication failed")
+                        .type(MessageType.red)
+                        .build());
+        return "redirect:/login";
+    }
+    User user = userService.getUserByEmail(email);
+    if (user == null) {
+        session.setAttribute("message",
+                Message.builder()
+                        .content("User not found")
+                        .type(MessageType.red)
+                        .build());
+        return "redirect:/login";
+    }
         Page<Contact> contactsPage;
         String field = contactSearchForm.getField();
         String keyword = contactSearchForm.getKeyword();
@@ -413,7 +455,15 @@ public class ContactController {
         }
         
         String username = UserHelper.getEmailOfLoggedInUser(authentication);
+        if (username == null || username.isEmpty()) {
+            logger.error("Failed to extract username from authentication");
+            return "redirect:/login";
+        }
         User user = userService.getUserByEmail(username);
+        if(user == null) {
+            logger.error("User not found for username: {}", username);
+            return "redirect:/login";
+        }
         Page<Contact> contactsPage = contactService.getFavoriteContactsByUser(user, page, size, sortBy, direction);
         model.addAttribute("contactsPage", contactsPage);
         model.addAttribute("pageSize", AppConstants.PAGE_SIZE);
