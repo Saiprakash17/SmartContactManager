@@ -2,14 +2,19 @@ package com.scm.contactmanager.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.scm.contactmanager.security.JwtAuthenticationFilter;
+import com.scm.contactmanager.security.JwtUtil;
 import com.scm.contactmanager.services.impl.SecurityCustomUserDeatilsService;
 
 @Configuration(proxyBeanMethods = false)
@@ -19,17 +24,24 @@ public class SecurityConfig {
 
     private final SecurityCustomUserDeatilsService userDetailsService;
     private final AuthFailtureHandler authFailtureHandler;
+    private final JwtUtil jwtUtil;
 
     public SecurityConfig(SecurityCustomUserDeatilsService userDetailsService,
-                         AuthFailtureHandler authFailtureHandler) {
+                         AuthFailtureHandler authFailtureHandler,
+                         JwtUtil jwtUtil) {
         this.userDetailsService = userDetailsService;
         this.authFailtureHandler = authFailtureHandler;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -44,7 +56,9 @@ public class SecurityConfig {
             // Configure authorization rules
             .authorizeHttpRequests(authorize ->
                 authorize
+                    .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/signup", "/login", "/css/**", "/js/**", "/img/**").permitAll()
+                    .requestMatchers("/api/**").authenticated()
                     .requestMatchers("/user/**").authenticated()
                     .anyRequest().permitAll()
             )
@@ -66,7 +80,7 @@ public class SecurityConfig {
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
             )
-            // Configure session management
+            // Configure session management - support both form login (session) and JWT (stateless)
             .sessionManagement(session ->
                 session
                     .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -100,9 +114,14 @@ public class SecurityConfig {
                             "upgrade-insecure-requests;"
                         )
                     )
-                    .frameOptions(frame -> frame.deny())
-                    .xssProtection()
+                    .frameOptions(frame -> frame.sameOrigin())
             );
+
+        // Add JWT Authentication Filter
+        httpSecurity.addFilterBefore(
+            new JwtAuthenticationFilter(jwtUtil, userDetailsService),
+            UsernamePasswordAuthenticationFilter.class
+        );
 
         return httpSecurity.build();
     }

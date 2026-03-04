@@ -2,7 +2,6 @@ package com.scm.contactmanager.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,7 +19,6 @@ import com.scm.contactmanager.services.UserDashboardService;
 import com.scm.contactmanager.security.SecurityAuditLogger;
 
 import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 
@@ -29,12 +27,13 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final UserDashboardService userDashboardService;
+    private final SecurityAuditLogger auditLogger;
 
-    @Autowired
-    private UserDashboardService userDashboardService;
-
-    @Autowired(required = false)
-    private SecurityAuditLogger auditLogger;
+    public UserController(UserDashboardService userDashboardService, SecurityAuditLogger auditLogger) {
+        this.userDashboardService = userDashboardService;
+        this.auditLogger = auditLogger;
+    }
 
     //dashboard
     @RequestMapping(value = "/dashboard", method = RequestMethod.GET)

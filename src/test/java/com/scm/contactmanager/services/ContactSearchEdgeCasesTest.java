@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,8 @@ class ContactSearchEdgeCasesTest extends BaseIntegrationTest {
         specialCharContact.setEmail("special@example.com");
         specialCharContact.setUser(testUser);
 
-        Page<Contact> contactPage = new PageImpl<>(Arrays.asList(specialCharContact));
+        List<Contact> contacts = Arrays.asList(specialCharContact);
+        Page<Contact> contactPage = new PageImpl<>(contacts);
 
         when(contactRepository.findByUserAndNameContaining(any(), any(), any()))
             .thenReturn(contactPage);
@@ -79,7 +81,9 @@ class ContactSearchEdgeCasesTest extends BaseIntegrationTest {
         longNameContact.setEmail("long@example.com");
         longNameContact.setUser(testUser);
 
-        Page<Contact> contactPage = new PageImpl<>(Arrays.asList(longNameContact));
+        List<Contact> contacts = Arrays.asList(longNameContact);
+        
+        Page<Contact> contactPage = new PageImpl<>(contacts);
 
         when(contactRepository.findByUserAndNameContaining(any(), any(), any()))
             .thenReturn(contactPage);
@@ -91,7 +95,8 @@ class ContactSearchEdgeCasesTest extends BaseIntegrationTest {
 
     @Test
     void shouldHandleEmptySearchString() {
-        Page<Contact> contactPage = new PageImpl<>(Arrays.asList(testContact));
+        List<Contact> contacts = Arrays.asList(testContact);
+        Page<Contact> contactPage = new PageImpl<>(contacts);
 
         when(contactRepository.findByUser(any(), any()))
             .thenReturn(contactPage);
@@ -108,7 +113,8 @@ class ContactSearchEdgeCasesTest extends BaseIntegrationTest {
         unicodeContact.setEmail("unicode@example.com");
         unicodeContact.setUser(testUser);
 
-        Page<Contact> contactPage = new PageImpl<>(Arrays.asList(unicodeContact));
+        List<Contact> contacts = Arrays.asList(unicodeContact);
+        Page<Contact> contactPage = new PageImpl<>(contacts);
 
         when(contactRepository.findByUserAndNameContaining(any(), any(), any()))
             .thenReturn(contactPage);

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -27,8 +26,11 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     Logger logger = org.slf4j.LoggerFactory.getLogger(OAuthAuthenticationSuccessHandler.class);
 
-    @Autowired
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
+
+    public OAuthAuthenticationSuccessHandler(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {

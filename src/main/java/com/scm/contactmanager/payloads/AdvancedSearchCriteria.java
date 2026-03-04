@@ -32,8 +32,12 @@ public class AdvancedSearchCriteria {
     private String websiteUrl;
     private LocalDate lastContactedFrom;
     private LocalDate lastContactedTo;
+    @Builder.Default
     private String sortBy = "name"; // name, createdAt, lastModified
+    @Builder.Default
     private String sortDirection = "ASC"; // ASC, DESC
+    @Builder.Default
     private Integer page = 0;
+    @Builder.Default
     private Integer size = 10;
 }

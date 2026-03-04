@@ -1,7 +1,7 @@
 package com.scm.contactmanager.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.Nullable;
 
 import com.scm.contactmanager.entities.Address;
 import com.scm.contactmanager.helper.ResourceNotFoundException;
@@ -11,22 +11,37 @@ import com.scm.contactmanager.services.AddressService;
 @Service
 public class AddressServiceImpl implements AddressService{
 
-    @Autowired
-    private AddressRepo addressRepo;
+    private final AddressRepo addressRepo;
+
+    public AddressServiceImpl(AddressRepo addressRepo) {
+        this.addressRepo = addressRepo;
+    }
 
     @Override
     public Address saveAddress(Address address) {
+        if (address == null) {
+            throw new IllegalArgumentException("Address cannot be null");
+        }
         return addressRepo.save(address);
     }
 
     @Override
     public Address getAddressById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
         return addressRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));
     }
 
     @Override
     public void deleteAddress(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
         Address address = addressRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + id));
+        if (address == null) {
+            throw new IllegalArgumentException("Address cannot be null");
+        }
         addressRepo.delete(address);
     }
 
@@ -42,6 +57,7 @@ public class AddressServiceImpl implements AddressService{
     }
 
     @Override
+    @Nullable
     public Address getAddressByContactId(Long contactId) {
         return addressRepo.findByContactId(contactId);
     }

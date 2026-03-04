@@ -2,7 +2,6 @@ package com.scm.contactmanager.services.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +19,13 @@ import com.scm.contactmanager.services.ContactTagService;
 @Transactional
 public class ContactTagServiceImpl implements ContactTagService {
 
-    @Autowired
-    private ContactTagRepo tagRepository;
+    private final ContactTagRepo tagRepository;
+    private final ContactRepo contactRepository;
 
-    @Autowired
-    private ContactRepo contactRepository;
+    public ContactTagServiceImpl(ContactTagRepo tagRepository, ContactRepo contactRepository) {
+        this.tagRepository = tagRepository;
+        this.contactRepository = contactRepository;
+    }
 
     @Override
     public ContactTag createTag(String name, String color, String description, User user) {

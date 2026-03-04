@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +21,13 @@ import com.scm.contactmanager.services.ImportantDateService;
 @Transactional
 public class ImportantDateServiceImpl implements ImportantDateService {
 
-    @Autowired
-    private ImportantDateRepo dateRepository;
+    private final ImportantDateRepo dateRepository;
+    private final EmailService emailService;
 
-    @Autowired
-    private EmailService emailService;
+    public ImportantDateServiceImpl(ImportantDateRepo dateRepository, EmailService emailService) {
+        this.dateRepository = dateRepository;
+        this.emailService = emailService;
+    }
 
     @Override
     public ImportantDate createImportantDate(Contact contact, String name, String dateStr,

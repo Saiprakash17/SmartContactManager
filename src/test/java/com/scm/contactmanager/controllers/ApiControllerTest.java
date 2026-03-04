@@ -24,8 +24,7 @@ import com.scm.contactmanager.services.ApiService;
 
 @WebMvcTest(ApiController.class)
 @Import({CommonTestConfig.class, GlobalExceptionHandler.class, TestSecurityConfig.class, TestApiConfig.class})
-@WithMockUser(username = "test@example.com", password = "testpassword", roles = "USER")
-public class ApiControllerTest {
+@WithMockUser(username = "test@example.com", password = "testpassword", roles = "USER")public class ApiControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

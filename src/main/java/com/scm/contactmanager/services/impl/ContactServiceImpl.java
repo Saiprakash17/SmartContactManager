@@ -9,7 +9,6 @@ import com.scm.contactmanager.forms.ContactsSearchForm;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,17 +23,29 @@ import com.scm.contactmanager.services.ContactService;
 
 @Service
 public class ContactServiceImpl implements ContactService {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private QRCodeGeneratorService qrCodeGeneratorService;
-    @Autowired
-    private ImageService imageService;
+    private final UserService userService;
+    private final QRCodeGeneratorService qrCodeGeneratorService;
+    private final ImageService imageService;
+    private final ContactRepo contactRepo;
+
+    public ContactServiceImpl(UserService userService, QRCodeGeneratorService qrCodeGeneratorService,
+            ImageService imageService, ContactRepo contactRepo) {
+        this.userService = userService;
+        this.qrCodeGeneratorService = qrCodeGeneratorService;
+        this.imageService = imageService;
+        this.contactRepo = contactRepo;
+    }
 
     @Override
     public Contact saveContact(ContactForm contactForm, org.springframework.security.core.Authentication authentication) {
         String username = com.scm.contactmanager.helper.UserHelper.getEmailOfLoggedInUser(authentication);
+        if (username == null || username.isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
         User user = userService.getUserByEmail(username);
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with email: " + username);
+        }
         Contact contact = new Contact();
         populateContactFromForm(contact, contactForm);
         contact.setUser(user);
@@ -124,11 +135,6 @@ public class ContactServiceImpl implements ContactService {
             return org.springframework.http.ResponseEntity.badRequest().body("{\"error\":\"Could not decode QR code. " + e.getMessage().replaceAll("\"", "'") + "\"}");
         }
     }
-
-    @Autowired
-    private ContactRepo contactRepo;
-
-    
 
     @Override
     public Contact saveContact(Contact contact) {

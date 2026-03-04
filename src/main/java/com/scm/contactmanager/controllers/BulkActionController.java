@@ -1,6 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -28,8 +27,11 @@ import jakarta.validation.Valid;
 @SecurityRequirement(name = "bearerAuth")
 public class BulkActionController {
 
-    @Autowired
-    private BulkActionService bulkActionService;
+    private final BulkActionService bulkActionService;
+
+    public BulkActionController(BulkActionService bulkActionService) {
+        this.bulkActionService = bulkActionService;
+    }
 
     @PostMapping("/actions")
     @Operation(summary = "Perform bulk action", description = "Perform bulk operations on multiple contacts (delete, tag, favorite, etc.)")

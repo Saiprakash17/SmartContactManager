@@ -7,13 +7,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
 public class FaviconController {
 
-    @Autowired
-    private ResourceLoader resourceLoader;
+    private final ResourceLoader resourceLoader;
+
+    public FaviconController(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     @GetMapping(value = "favicon.ico", produces = "image/x-icon")
     @ResponseBody

@@ -1,6 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.scm.contactmanager.entities.User;
@@ -14,11 +13,21 @@ import jakarta.websocket.server.PathParam;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
     
     @RequestMapping("/verify-email")
     public String verifyEmail(@PathParam("email") String email, @PathParam("token") String token, HttpSession session) {
+        if (email == null || email.isEmpty() || token == null || token.isEmpty()) {
+            session.setAttribute("message", Message.builder()
+                        .type(MessageType.red)
+                        .content("Invalid email verification link")
+                        .build());
+            return "redirect:/login";
+        }
         User user = userService.getUserByEmailAndVerifyToken(email, token);
         if (user != null) {
             user.setVerifyToken(null); 

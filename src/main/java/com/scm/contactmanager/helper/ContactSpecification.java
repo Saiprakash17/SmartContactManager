@@ -99,7 +99,9 @@ public class ContactSpecification {
             if (!CollectionUtils.isEmpty(criteria.getTagIds())) {
                 Join<Contact, ContactTag> tagJoin = root.join("tags", JoinType.INNER);
                 predicates.add(tagJoin.get("id").in(criteria.getTagIds()));
-                query.distinct(true);
+                if (query != null) {
+                    query.distinct(true);
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

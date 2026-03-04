@@ -1,7 +1,6 @@
 package com.scm.contactmanager.controllers;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,9 +14,11 @@ import com.scm.contactmanager.services.UserService;
 public class RootController {
 
     Logger logger = org.slf4j.LoggerFactory.getLogger(UserController.class);
+    private final UserService userService;
 
-    @Autowired
-    UserService userService;
+    public RootController(UserService userService) {
+        this.userService = userService;
+    }
 
     @ModelAttribute
     public void addLoggedInUserInModel(Model model, Authentication authentication) {

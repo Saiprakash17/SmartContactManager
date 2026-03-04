@@ -39,11 +39,11 @@ public class TestApiConfig implements WebMvcConfigurer {
     @Bean
     @Primary
     public ContactService contactService() {
-        ContactServiceImpl service = new ContactServiceImpl();
-        org.springframework.test.util.ReflectionTestUtils.setField(service, "userService", userService());
-        org.springframework.test.util.ReflectionTestUtils.setField(service, "qrCodeGeneratorService", qrCodeGeneratorService());
-        org.springframework.test.util.ReflectionTestUtils.setField(service, "imageService", imageService());
-        org.springframework.test.util.ReflectionTestUtils.setField(service, "contactRepo", contactRepo());
-        return service;
+        return new ContactServiceImpl(
+            userService(),
+            qrCodeGeneratorService(),
+            imageService(),
+            contactRepo()
+        );
     }
 }

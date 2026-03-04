@@ -1,6 +1,5 @@
 package com.scm.contactmanager.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.security.core.Authentication;
 
 import com.scm.contactmanager.forms.FeedbackForm;
 import com.scm.contactmanager.forms.UserForm;
@@ -29,14 +27,15 @@ import jakarta.validation.Valid;
 @Controller
 public class PageController {
 
-    @Autowired
-    private PageService pageService;
+    private final PageService pageService;
+    private final RateLimiter rateLimiter;
+    private final SecurityAuditLogger auditLogger;
 
-    @Autowired(required = false)
-    private RateLimiter rateLimiter;
-
-    @Autowired(required = false)
-    private SecurityAuditLogger auditLogger;
+    public PageController(PageService pageService, RateLimiter rateLimiter, SecurityAuditLogger auditLogger) {
+        this.pageService = pageService;
+        this.rateLimiter = rateLimiter;
+        this.auditLogger = auditLogger;
+    }
 
     @RequestMapping("/")
     public String index() {
