@@ -38,8 +38,7 @@ public class NoSecurityConfig {
     @Bean
     @Primary
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
         return new ProviderManager(authenticationProvider);
     }
