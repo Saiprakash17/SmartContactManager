@@ -10,4 +10,7 @@
     <include file="db/changelog/02-create-contact-activities-table.xml"/>
     <include file="db/changelog/03-create-important-dates-table.xml"/>
 
+    <!-- Phase 2 Features Changelog -->
+    <include file="db/changelog/04-create-communication-logs-table.xml"/>
+
 </databaseChangeLog>
